@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Protocol Port Quiz</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .question {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .options {
+            margin-top: 10px;
+        }
+        .option {
+            margin: 5px 0;
+        }
+        #result {
+            margin-top: 20px;
+            font-weight: bold;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .correct {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+        .incorrect {
+            color: #f44336;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Protocol Port Quiz</h1>
+    <div id="quiz"></div>
+    <button onclick="checkAnswers()">Submit Quiz</button>
+    <div id="result"></div>
+
+    <script>
+        const questions = [
+            { protocol: "HTTP", port: "80", options: ["80", "443", "22", "21"] },
+            { protocol: "HTTPS", port: "443", options: ["443", "80", "25", "53"] },
+            { protocol: "FTP", port: "21", options: ["21", "22", "23", "25"] },
+            { protocol: "SSH", port: "22", options: ["22", "21", "23", "80"] },
+            { protocol: "SMTP", port: "25", options: ["25", "110", "143", "587"] },
+            { protocol: "DNS", port: "53", options: ["53", "80", "443", "3306"] },
+            { protocol: "POP3", port: "110", options: ["110", "143", "25", "587"] },
+            { protocol: "IMAP", port: "143", options: ["143", "110", "80", "443"] },
+            { protocol: "SFTP", port: "22", options: ["22", "21", "23", "25"] },
+            { protocol: "MySQL", port: "3306", options: ["3306", "5432", "1433", "27017"] },
+            { protocol: "PostgreSQL", port: "5432", options: ["5432", "3306", "1433", "27017"] },
+            { protocol: "RDP", port: "3389", options: ["3389", "3306", "5900", "22"] },
+            { protocol: "Telnet", port: "23", options: ["23", "22", "21", "25"] },
+            { protocol: "LDAP", port: "389", options: ["389", "636", "443", "80"] },
+            { protocol: "SMTP (Alternative)", port: "587", options: ["587", "25", "465", "110"] },
+            { protocol: "MongoDB", port: "27017", options: ["27017", "3306", "5432", "1433"] },
+            { protocol: "VNC", port: "5900", options: ["5900", "3389", "22", "443"] },
+            { protocol: "SMTPS", port: "465", options: ["465", "587", "25", "110"] },
+            { protocol: "LDAPS", port: "636", options: ["636", "389", "443", "80"] },
+            { protocol: "MSSQL", port: "1433", options: ["1433", "3306", "5432", "27017"] }
+        ];
+
+        let selectedQuestions = [];
+        let correctAnswers = [];
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function generateQuiz() {
+            const shuffledQuestions = shuffleArray([...questions]);
+            selectedQuestions = shuffledQuestions.slice(0, 10);
+            correctAnswers = selectedQuestions.map(q => q.port);
+
+            const quizContainer = document.getElementById('quiz');
+            quizContainer.innerHTML = '';
+
+            selectedQuestions.forEach((q, index) => {
+                const questionDiv = document.createElement('div');
+                questionDiv.className = 'question';
+                questionDiv.innerHTML = `
+                    <p>Question ${index + 1}: What is the default port for ${q.protocol}?</p>
+                    <div class="options">
+                        ${shuffleArray([...q.options]).map(option => `
+                            <div class="option">
+                                <input type="radio" name="q${index}" value="${option}" id="q${index}o${option}">
+                                <label for="q${index}o${option}">${option}</label>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div id="feedback${index}" style="display: none;"></div>
+                `;
+                quizContainer.appendChild(questionDiv);
+            });
+
+            // Clear previous results
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '';
+        }
+
+        function checkAnswers() {
+            let score = 0;
+            selectedQuestions.forEach((q, index) => {
+                const selected = document.querySelector(`input[name="q${index}"]:checked`);
+                const feedbackDiv = document.getElementById(`feedback${index}`);
+                
+                if (selected) {
+                    const isCorrect = selected.value === q.port;
+                    if (isCorrect) {
+                        score++;
+                    }
+                    
+                    feedbackDiv.innerHTML = `
+                        <p class="${isCorrect ? 'correct' : 'incorrect'}">
+                            ${isCorrect ? 'Correct!' : 'Incorrect!'} 
+                            The correct port for ${q.protocol} is ${q.port}
+                        </p>
+                    `;
+                    feedbackDiv.style.display = 'block';
+                } else {
+                    feedbackDiv.innerHTML = `
+                        <p class="incorrect">
+                            No answer selected. The correct port for ${q.protocol} is ${q.port}
+                        </p>
+                    `;
+                    feedbackDiv.style.display = 'block';
+                }
+            });
+
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = `
+                <h2>Your score: ${score} out of 10</h2>
+                <button onclick="generateQuiz()">Try Again</button>
+            `;
+
+            // Disable all inputs after submission
+            document.querySelectorAll('input[type="radio"]').forEach(input => {
+                input.disabled = true;
+            });
+
+            // Hide the submit button
+            document.querySelector('button[onclick="checkAnswers()"]').style.display = 'none';
+        }
+
+        // Initialize the quiz when the page loads
+        window.onload = generateQuiz;
+    </script>
+</body>
+</html>
+
