@@ -335,7 +335,7 @@
                 <input type="text" id="description">
             </div>
 
-            <button class="submit-button" onclick="addTransaction()">Add Transaction</button>
+            <button class="submit-button" id="addOrUpdateBtn" onclick="addOrUpdateTransaction()">Add Transaction</button>
         </div>
 
         <div class="input-group" style="display: flex; gap: 10px;">
@@ -605,10 +605,62 @@
             }
         }
 
-        function addTransaction() {
+        // --- Edit Transaction Functionality ---
+        let editTransactionId = null;
+
+        function displayTransactions(transactionsToShow) {
+            const transactionsDiv = document.getElementById('transactions');
+            transactionsDiv.innerHTML = '';
+
+            transactionsToShow.forEach(transaction => {
+                const div = document.createElement('div');
+                div.className = `transaction ${transaction.type}`;
+                div.style.display = 'flex';
+                div.style.justifyContent = 'space-between';
+                div.style.alignItems = 'center';
+                div.style.padding = '15px';
+                div.style.margin = '10px 0';
+                div.style.backgroundColor = 'white';
+                div.style.borderRadius = '8px';
+                div.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+                div.style.transition = 'transform 0.2s';
+                div.style.borderLeft = transaction.type === 'income' ? '4px solid #28a745' : '4px solid #dc3545';
+
+                div.innerHTML = `
+                    <div class="transaction-date" style="min-width:100px; color:#6c757d;">${new Date(transaction.date).toLocaleDateString()}</div>
+                    <div class="transaction-category" style="min-width:120px; color:#495057; font-weight:500;">${transaction.category}</div>
+                    <div class="transaction-description" style="flex-grow:1; color:#212529;">${transaction.description}</div>
+                    <div class="transaction-amount" style="min-width:100px; text-align:right; font-weight:bold; color:${transaction.type === 'income' ? '#28a745' : '#dc3545'};">₹${transaction.amount}</div>
+                    <div class="transaction-actions">
+                        <button class="delete-button" onclick="deleteTransaction(${transaction.id})">Delete</button>
+                        <button class="submit-button" style="background:#2196F3; color:white; margin-left:5px;" onclick="editTransaction(${transaction.id})">Edit</button>
+                    </div>
+                `;
+                transactionsDiv.appendChild(div);
+            });
+        }
+
+        function editTransaction(id) {
+            const transaction = transactions.find(t => t.id === id);
+            if (!transaction) return;
+            editTransactionId = id;
+            document.getElementById('type').value = transaction.type;
+            updateCategories();
+            document.getElementById('category').value = transaction.category;
+            document.getElementById('amount').value = parseFloat(transaction.amount).toFixed(2);
+            document.getElementById('paymentMode').value = transaction.paymentMode;
+            document.getElementById('date').value = transaction.date;
+            document.getElementById('description').value = transaction.description;
+            // Change button to 'Update Transaction'
+            document.getElementById('addOrUpdateBtn').textContent = 'Update Transaction';
+            // Switch to Add Transaction tab
+            showTab('add');
+        }
+
+        function addOrUpdateTransaction() {
             const type = document.getElementById('type').value;
             const category = document.getElementById('category').value;
-            const amount = parseFloat(document.getElementById('amount').value);
+            const amount = parseFloat(parseFloat(document.getElementById('amount').value).toFixed(2));
             const paymentMode = document.getElementById('paymentMode').value;
             const date = document.getElementById('date').value;
             const description = document.getElementById('description').value;
@@ -618,30 +670,39 @@
                 return;
             }
 
-            const transaction = {
-                type,
-                category,
-                amount,
-                paymentMode,
-                date,
-                description,
-                id: Date.now()
-            };
-
-            transactions.push(transaction);
+            if (editTransactionId) {
+                // Update existing transaction
+                const idx = transactions.findIndex(t => t.id === editTransactionId);
+                if (idx !== -1) {
+                    transactions[idx] = {
+                        ...transactions[idx],
+                        type,
+                        category,
+                        amount,
+                        paymentMode,
+                        date,
+                        description
+                    };
+                }
+                editTransactionId = null;
+                document.getElementById('addOrUpdateBtn').textContent = 'Add Transaction';
+            } else {
+                // Add new transaction
+                const transaction = {
+                    type,
+                    category,
+                    amount,
+                    paymentMode,
+                    date,
+                    description,
+                    id: Date.now()
+                };
+                transactions.push(transaction);
+            }
             saveTransactions();
             updateDisplay();
             applySummaryFilters();
             applyTransactionsFilters();
-            // Show all if no filters
-            if (
-                document.querySelector('#transactionsFilters #dateFilter').value === 'all' &&
-                document.querySelector('#transactionsFilters #monthFilter').value === 'all' &&
-                document.querySelector('#transactionsFilters #yearFilter').value === 'all' &&
-                document.querySelector('#transactionsFilters #categoryFilter').value === 'all'
-            ) {
-                displayTransactions(transactions);
-            }
             clearForm();
         }
 
@@ -707,13 +768,16 @@
 
             document.getElementById('totalIncome').textContent = `₹${totalIncome}`;
             document.getElementById('totalExpenses').textContent = `₹${totalExpenses}`;
-            document.getElementById('creditCardDue').textContent = `₹${Math.max(0, creditCardDue)}`;
-            document.getElementById('balance').textContent = `₹${totalIncome - totalExpenses}`;
+            document.getElementById('creditCardDue').textContent = `₹${Math.max(0, creditCardDue).toFixed(2)}`;
+            document.getElementById('balance').textContent = `₹${(totalIncome - totalExpenses).toFixed(2)}`;
         }
 
         function clearForm() {
             document.getElementById('amount').value = '';
             document.getElementById('description').value = '';
+            document.getElementById('date').value = '';
+            editTransactionId = null;
+            document.getElementById('addOrUpdateBtn').textContent = 'Add Transaction';
         }
 
         document.addEventListener('DOMContentLoaded', function() {
@@ -980,37 +1044,6 @@
             });
             document.getElementById('yearlyBarLabel').textContent = `Yearly Income & Expense (${year})`;
             document.getElementById('yearlyBarChart').style.display = 'block';
-        }
-
-        function displayTransactions(transactionsToShow) {
-            const transactionsDiv = document.getElementById('transactions');
-            transactionsDiv.innerHTML = '';
-
-            transactionsToShow.forEach(transaction => {
-                const div = document.createElement('div');
-                div.className = `transaction ${transaction.type}`;
-                div.style.display = 'flex';
-                div.style.justifyContent = 'space-between';
-                div.style.alignItems = 'center';
-                div.style.padding = '15px';
-                div.style.margin = '10px 0';
-                div.style.backgroundColor = 'white';
-                div.style.borderRadius = '8px';
-                div.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
-                div.style.transition = 'transform 0.2s';
-                div.style.borderLeft = transaction.type === 'income' ? '4px solid #28a745' : '4px solid #dc3545';
-
-                div.innerHTML = `
-                    <div class="transaction-date" style="min-width:100px; color:#6c757d;">${new Date(transaction.date).toLocaleDateString()}</div>
-                    <div class="transaction-category" style="min-width:120px; color:#495057; font-weight:500;">${transaction.category}</div>
-                    <div class="transaction-description" style="flex-grow:1; color:#212529;">${transaction.description}</div>
-                    <div class="transaction-amount" style="min-width:100px; text-align:right; font-weight:bold; color:${transaction.type === 'income' ? '#28a745' : '#dc3545'};">₹${transaction.amount}</div>
-                    <div class="transaction-actions">
-                        <button class="delete-button" onclick="deleteTransaction(${transaction.id})">Delete</button>
-                    </div>
-                `;
-                transactionsDiv.appendChild(div);
-            });
         }
     </script>
 </body>
