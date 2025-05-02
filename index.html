@@ -190,12 +190,12 @@
             #expensePieChart {
                 width: 100% !important;
                 height: auto !important;
-                max-width: 180px;
+                max-width: 220px;
             }
             #yearlyBarChart {
                 width: 100% !important;
                 height: auto !important;
-                max-width: 380px;
+                max-width: 440px;
             }
             .chart-flex {
                 flex-direction: column !important;
@@ -466,13 +466,13 @@
                 </select>
             </div>
         </div>
-        <div style="margin: 30px 0; display: flex; justify-content: center; align-items: flex-start; gap: 20px; flex-wrap: wrap;">
-            <div style="text-align:center;">
-                <canvas id="expensePieChart" width="180" height="180" style="display:inline-block; max-width:180px; height:auto;"></canvas>
+        <div style="margin: 30px 0; display: flex; justify-content: center; align-items: flex-start; gap: 20px; flex-wrap: wrap; width: 100%;">
+            <div style="text-align:center; flex: 0 1 220px;">
+                <canvas id="expensePieChart" width="220" height="220" style="display:inline-block; max-width:220px; height:auto;"></canvas>
                 <div id="expenseSum" style="text-align:center; font-weight:bold; margin-top:10px;"></div>
             </div>
-            <div style="text-align:center;">
-                <canvas id="yearlyBarChart" width="380" height="240" style="display:inline-block; max-width:380px; height:auto;"></canvas>
+            <div style="text-align:center; flex: 0 1 440px;">
+                <canvas id="yearlyBarChart" width="440" height="280" style="display:inline-block; max-width:440px; height:auto;"></canvas>
                 <div id="yearlyBarLabel" style="text-align:center; font-weight:bold; margin-top:10px;"></div>
             </div>
         </div>
