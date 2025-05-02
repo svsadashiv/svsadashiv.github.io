@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Expense Tracker</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -186,120 +187,223 @@
             h2 {
                 font-size: 18px;
             }
+            #expensePieChart {
+                width: 100% !important;
+                height: auto !important;
+                max-width: 180px;
+            }
+            #yearlyBarChart {
+                width: 100% !important;
+                height: auto !important;
+                max-width: 380px;
+            }
+            .chart-flex {
+                flex-direction: column !important;
+                align-items: center !important;
+            }
+        }
+
+        .tab-btn {
+            background: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 5px 5px 0 0;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            outline: none;
+            font-weight: 500;
+            color: #333;
+            transition: background 0.2s, color 0.2s;
+        }
+        .tab-btn.active {
+            background: #4CAF50;
+            color: #fff;
+            border-bottom: 2px solid #4CAF50;
+        }
+        @media (max-width: 600px) {
+            .tab-btn {
+                font-size: 15px;
+                padding: 8px 10px;
+            }
+        }
+
+        .filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .filter-group label {
+            font-size: 14px;
+            color: #495057;
+            font-weight: 500;
+        }
+        .filter-select {
+            padding: 8px 12px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            background-color: white;
+            font-size: 14px;
+            color: #495057;
+            min-width: 150px;
+            cursor: pointer;
+        }
+        .filter-select:focus {
+            outline: none;
+            border-color: #80bdff;
+            box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+        }
+        @media (max-width: 600px) {
+            .filters {
+                flex-direction: column;
+                gap: 10px;
+                padding: 8px;
+            }
+            .filter-group {
+                min-width: 0;
+            }
+            .filter-group label {
+                font-size: 13px;
+            }
+            .filter-select {
+                font-size: 15px;
+                padding: 7px;
+                min-width: 0;
+            }
         }
     </style>
 </head>
 <body>
     <h1>Expense Tracker</h1>
 
-    <div class="form-container">
-        <div class="input-group">
-            <label for="type">Transaction Type</label>
-            <select id="type">
-                <option value="expense">Expense</option>
-                <option value="income">Income</option>
-            </select>
-        </div>
-
-        <div class="input-group">
-            <label for="category">Category</label>
-            <select id="category"></select>
-        </div>
-
-        <div class="input-group">
-            <label for="amount">Amount (₹)</label>
-            <input type="number" id="amount" required>
-        </div>
-
-        <div class="input-group">
-            <label for="paymentMode">Payment Mode</label>
-            <select id="paymentMode">
-                <option value="cash">Cash</option>
-                <option value="upi">UPI</option>
-                <option value="credit">Credit Card</option>
-            </select>
-        </div>
-
-        <div class="input-group">
-            <label for="date">Date</label>
-            <input type="date" id="date" required>
-            <script>
-                document.getElementById('date').valueAsDate = new Date();
-            </script>
-        </div>
-
-        <div class="input-group">
-            <label for="description">Description</label>
-            <input type="text" id="description">
-        </div>
-
-        <button class="submit-button" onclick="addTransaction()">Add Transaction</button>
+    <!-- Tab Bar -->
+    <div id="tabBar" style="display: flex; justify-content: center; margin-bottom: 20px; gap: 10px;">
+        <button class="tab-btn" id="tabAdd" onclick="showTab('add')">Add Transaction</button>
+        <button class="tab-btn" id="tabSummary" onclick="showTab('summary')">Summary</button>
+        <button class="tab-btn" id="tabTransactions" onclick="showTab('transactions')">Transactions</button>
     </div>
 
-    <div class="input-group" style="display: flex; gap: 10px;">
-        <button class="submit-button" onclick="exportTransactions()" style="flex: 1;">Export Transactions</button>
-        <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importTransactions(event)">
-        <button class="submit-button" onclick="document.getElementById('importFile').click()" style="flex: 1;">Import Transactions</button>
-    </div>
-    <script>
-        function exportTransactions() {
-            const dataStr = JSON.stringify(transactions, null, 2);
-            const blob = new Blob([dataStr], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = 'transactions.json';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            URL.revokeObjectURL(url);
-        }
+    <!-- Add Transaction Tab -->
+    <div id="tabAddContent">
+        <div class="form-container">
+            <div class="input-group">
+                <label for="type">Transaction Type</label>
+                <select id="type">
+                    <option value="expense">Expense</option>
+                    <option value="income">Income</option>
+                </select>
+            </div>
 
-        function importTransactions(event) {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    try {
-                        const importedTransactions = JSON.parse(e.target.result);
-                        transactions = importedTransactions;
-                        saveTransactions();
-                        updateDisplay();
-                        alert('Transactions imported successfully!');
-                    } catch (error) {
-                        alert('Error importing transactions. Please check the file format.');
-                    }
-                };
-                reader.readAsText(file);
+            <div class="input-group">
+                <label for="category">Category</label>
+                <select id="category"></select>
+            </div>
+
+            <div class="input-group">
+                <label for="amount">Amount (₹)</label>
+                <input type="number" id="amount" required>
+            </div>
+
+            <div class="input-group">
+                <label for="paymentMode">Payment Mode</label>
+                <select id="paymentMode">
+                    <option value="cash">Cash</option>
+                    <option value="upi">UPI</option>
+                    <option value="credit">Credit Card</option>
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label for="date">Date</label>
+                <input type="date" id="date" required>
+                <script>
+                    document.getElementById('date').valueAsDate = new Date();
+                </script>
+            </div>
+
+            <div class="input-group">
+                <label for="description">Description</label>
+                <input type="text" id="description">
+            </div>
+
+            <button class="submit-button" onclick="addTransaction()">Add Transaction</button>
+        </div>
+
+        <div class="input-group" style="display: flex; gap: 10px;">
+            <button class="submit-button" onclick="exportTransactions()" style="flex: 1;">Export Transactions</button>
+            <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importTransactions(event)">
+            <button class="submit-button" onclick="document.getElementById('importFile').click()" style="flex: 1;">Import Transactions</button>
+        </div>
+        <script>
+            function exportTransactions() {
+                const dataStr = JSON.stringify(transactions, null, 2);
+                const blob = new Blob([dataStr], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = 'transactions.json';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
             }
-        }
-    </script>
 
-    <div class="summary">
-        <div class="summary-item">
-            <h3>Total Income</h3>
-            <p id="totalIncome">₹0</p>
-        </div>
-        <div class="summary-item">
-            <h3>Total Expenses</h3>
-            <p id="totalExpenses">₹0</p>
-        </div>
-        <div class="summary-item">
-            <h3>Credit Card Due</h3>
-            <p id="creditCardDue">₹0</p>
-        </div>
-        <div class="summary-item">
-            <h3>Balance</h3>
-            <p id="balance">₹0</p>
-        </div>
+            function importTransactions(event) {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        try {
+                            const importedTransactions = JSON.parse(e.target.result);
+                            transactions = importedTransactions;
+                            saveTransactions();
+                            updateDisplay();
+                            applySummaryFilters();
+                            applyTransactionsFilters();
+                            alert('Transactions imported successfully!');
+                        } catch (error) {
+                            alert('Error importing transactions. Please check the file format.');
+                        }
+                    };
+                    reader.readAsText(file);
+                }
+            }
+        </script>
     </div>
 
-    <div class="transaction-list">
-        <h2>Recent Transactions</h2>
-        <div class="filters">
+    <!-- Summary Tab -->
+    <div id="tabSummaryContent" style="display:none;">
+        <div class="summary">
+            <div class="summary-item">
+                <h3>Total Income</h3>
+                <p id="totalIncome">₹0</p>
+            </div>
+            <div class="summary-item">
+                <h3>Total Expenses</h3>
+                <p id="totalExpenses">₹0</p>
+            </div>
+            <div class="summary-item">
+                <h3>Credit Card Due</h3>
+                <p id="creditCardDue">₹0</p>
+            </div>
+            <div class="summary-item">
+                <h3>Balance</h3>
+                <p id="balance">₹0</p>
+            </div>
+        </div>
+        <div class="filters" id="summaryFilters">
             <div class="filter-group">
                 <label for="dateFilter">Date Range:</label>
-                <select id="dateFilter" class="filter-select" onchange="applyFilters()">
+                <select id="dateFilter" class="filter-select" onchange="applySummaryFilters()">
                     <option value="all">All Dates</option>
                     <option value="today">Today</option>
                     <option value="week">This Week</option>
@@ -308,7 +412,7 @@
             </div>
             <div class="filter-group">
                 <label for="monthFilter">Month:</label>
-                <select id="monthFilter" class="filter-select" onchange="applyFilters()">
+                <select id="monthFilter" class="filter-select" onchange="applySummaryFilters()">
                     <option value="all">All Months</option>
                     <option value="1">January</option>
                     <option value="2">February</option>
@@ -326,7 +430,7 @@
             </div>
             <div class="filter-group">
                 <label for="yearFilter">Year:</label>
-                <select id="yearFilter" class="filter-select" onchange="applyFilters()">
+                <select id="yearFilter" class="filter-select" onchange="applySummaryFilters()">
                     <option value="all">All Years</option>
                     <option value="2023">2023</option>
                     <option value="2024">2024</option>
@@ -335,7 +439,7 @@
             </div>
             <div class="filter-group">
                 <label for="categoryFilter">Category:</label>
-                <select id="categoryFilter" class="filter-select" onchange="applyFilters()">
+                <select id="categoryFilter" class="filter-select" onchange="applySummaryFilters()">
                     <option value="all">All Categories</option>
                     <option value="all_income">All Incomes</option>
                     <option value="all_expense">All Expenses</option>
@@ -362,173 +466,91 @@
                 </select>
             </div>
         </div>
-        <div id="transactions"></div>
-        <style>
-            .filters {
-                display: flex;
-                flex-wrap: wrap;
-                gap: 20px;
-                margin: 20px 0;
-                padding: 15px;
-                background-color: #f8f9fa;
-                border-radius: 8px;
-                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            }
-
-            .filter-group {
-                display: flex;
-                flex-direction: column;
-                gap: 5px;
-            }
-
-            .filter-group label {
-                font-size: 14px;
-                color: #495057;
-                font-weight: 500;
-            }
-
-            .filter-select {
-                padding: 8px 12px;
-                border: 1px solid #ced4da;
-                border-radius: 4px;
-                background-color: white;
-                font-size: 14px;
-                color: #495057;
-                min-width: 150px;
-                cursor: pointer;
-            }
-
-            .filter-select:focus {
-                outline: none;
-                border-color: #80bdff;
-                box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
-            }
-
-            .transaction {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                padding: 15px;
-                margin: 10px 0;
-                background-color: white;
-                border-radius: 8px;
-                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-                transition: transform 0.2s;
-            }
-
-            .transaction:hover {
-                transform: translateY(-2px);
-            }
-
-            .transaction.income {
-                border-left: 4px solid #28a745;
-            }
-
-            .transaction.expense {
-                border-left: 4px solid #dc3545;
-            }
-
-            .transaction div {
-                padding: 0 10px;
-            }
-
-            .transaction-date {
-                min-width: 100px;
-                color: #6c757d;
-            }
-
-            .transaction-category {
-                min-width: 120px;
-                color: #495057;
-                font-weight: 500;
-            }
-
-            .transaction-description {
-                flex-grow: 1;
-                color: #212529;
-            }
-
-            .transaction-amount {
-                min-width: 100px;
-                text-align: right;
-                font-weight: bold;
-            }
-
-            .income .transaction-amount {
-                color: #28a745;
-            }
-
-            .expense .transaction-amount {
-                color: #dc3545;
-            }
-        </style>
-        <script>
-            function applyFilters() {
-                const dateFilter = document.getElementById('dateFilter').value;
-                const monthFilter = document.getElementById('monthFilter').value;
-                const yearFilter = document.getElementById('yearFilter').value;
-                const categoryFilter = document.getElementById('categoryFilter').value;
-
-                const filteredTransactions = transactions.filter(transaction => {
-                    const transactionDate = new Date(transaction.date);
-                    const today = new Date();
-                    
-                    // Date filter
-                    if (dateFilter !== 'all') {
-                        if (dateFilter === 'today') {
-                            if (transactionDate.toDateString() !== today.toDateString()) return false;
-                        } else if (dateFilter === 'week') {
-                            const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
-                            if (transactionDate < weekAgo) return false;
-                        } else if (dateFilter === 'month') {
-                            if (transactionDate.getMonth() !== today.getMonth() || 
-                                transactionDate.getFullYear() !== today.getFullYear()) return false;
-                        }
-                    }
-
-                    // Month filter
-                    if (monthFilter !== 'all' && transactionDate.getMonth() + 1 !== parseInt(monthFilter)) return false;
-
-                    // Year filter
-                    if (yearFilter !== 'all' && transactionDate.getFullYear() !== parseInt(yearFilter)) return false;
-
-                    // Category/type filter
-                    if (categoryFilter === 'all_income') {
-                        if (transaction.type !== 'income') return false;
-                    } else if (categoryFilter === 'all_expense') {
-                        if (transaction.type !== 'expense') return false;
-                    } else if (categoryFilter !== 'all' && transaction.category !== categoryFilter) {
-                        return false;
-                    }
-
-                    return true;
-                });
-
-                displayTransactions(filteredTransactions);
-            }
-
-            function displayTransactions(transactionsToShow) {
-                const transactionsDiv = document.getElementById('transactions');
-                transactionsDiv.innerHTML = '';
-
-                transactionsToShow.forEach(transaction => {
-                    const transactionElement = document.createElement('div');
-                    transactionElement.className = `transaction ${transaction.type}`;
-                    transactionElement.innerHTML = `
-                        <div class="transaction-date">${new Date(transaction.date).toLocaleDateString()}</div>
-                        <div class="transaction-category">${transaction.category}</div>
-                        <div class="transaction-description">${transaction.description}</div>
-                        <div class="transaction-amount">₹${transaction.amount}</div>
-                        <div class="transaction-actions">
-                            <button class="delete-button" onclick="deleteTransaction(${transaction.id})">Delete</button>
-                        </div>
-                    `;
-                    transactionsDiv.appendChild(transactionElement);
-                });
-            }
-        </script>
+        <div style="margin: 30px 0; display: flex; justify-content: center; align-items: flex-start; gap: 20px; flex-wrap: wrap;">
+            <div style="text-align:center;">
+                <canvas id="expensePieChart" width="180" height="180" style="display:inline-block; max-width:180px; height:auto;"></canvas>
+                <div id="expenseSum" style="text-align:center; font-weight:bold; margin-top:10px;"></div>
+            </div>
+            <div style="text-align:center;">
+                <canvas id="yearlyBarChart" width="380" height="240" style="display:inline-block; max-width:380px; height:auto;"></canvas>
+                <div id="yearlyBarLabel" style="text-align:center; font-weight:bold; margin-top:10px;"></div>
+            </div>
+        </div>
     </div>
 
+    <!-- Transactions Tab -->
+    <div id="tabTransactionsContent" style="display:none;">
+        <div class="filters" id="transactionsFilters">
+            <div class="filter-group">
+                <label for="dateFilter">Date Range:</label>
+                <select id="dateFilter" class="filter-select" onchange="applyTransactionsFilters()">
+                    <option value="all">All Dates</option>
+                    <option value="today">Today</option>
+                    <option value="week">This Week</option>
+                    <option value="month">This Month</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="monthFilter">Month:</label>
+                <select id="monthFilter" class="filter-select" onchange="applyTransactionsFilters()">
+                    <option value="all">All Months</option>
+                    <option value="1">January</option>
+                    <option value="2">February</option>
+                    <option value="3">March</option>
+                    <option value="4">April</option>
+                    <option value="5">May</option>
+                    <option value="6">June</option>
+                    <option value="7">July</option>
+                    <option value="8">August</option>
+                    <option value="9">September</option>
+                    <option value="10">October</option>
+                    <option value="11">November</option>
+                    <option value="12">December</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="yearFilter">Year:</label>
+                <select id="yearFilter" class="filter-select" onchange="applyTransactionsFilters()">
+                    <option value="all">All Years</option>
+                    <option value="2023">2023</option>
+                    <option value="2024">2024</option>
+                    <option value="2025">2025</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="categoryFilter">Category:</label>
+                <select id="categoryFilter" class="filter-select" onchange="applyTransactionsFilters()">
+                    <option value="all">All Categories</option>
+                    <option value="all_income">All Incomes</option>
+                    <option value="all_expense">All Expenses</option>
+                    <optgroup label="Income">
+                        <option value="Salary">Salary</option>
+                        <option value="Freelance">Freelance</option>
+                        <option value="Investment">Investment</option>
+                        <option value="Other">Other</option>
+                    </optgroup>
+                    <optgroup label="Expense">
+                        <option value="Bills">Bills</option>
+                        <option value="Credit Card">Credit Card</option>
+                        <option value="Entertainment">Entertainment</option>
+                        <option value="EMI">EMI</option>
+                        <option value="Food">Food</option>
+                        <option value="Home">Home</option>
+                        <option value="Health">Health</option>
+                        <option value="Rent">Rent</option>
+                        <option value="Transport">Transport</option>
+                        <option value="Trip">Trip</option>
+                        <option value="Miscellaneous">Miscellaneous</option>
+                        <option value="Other">Other</option>
+                    </optgroup>
+                </select>
+            </div>
+        </div>
+        <div class="transaction-list">
+            <h2>Recent Transactions</h2>
+            <div id="transactions"></div>
+        </div>
+    </div>
 
     <script>
         const categories = {
@@ -609,6 +631,17 @@
             transactions.push(transaction);
             saveTransactions();
             updateDisplay();
+            applySummaryFilters();
+            applyTransactionsFilters();
+            // Show all if no filters
+            if (
+                document.querySelector('#transactionsFilters #dateFilter').value === 'all' &&
+                document.querySelector('#transactionsFilters #monthFilter').value === 'all' &&
+                document.querySelector('#transactionsFilters #yearFilter').value === 'all' &&
+                document.querySelector('#transactionsFilters #categoryFilter').value === 'all'
+            ) {
+                displayTransactions(transactions);
+            }
             clearForm();
         }
 
@@ -616,6 +649,17 @@
             transactions = transactions.filter(t => t.id !== id);
             saveTransactions();
             updateDisplay();
+            applySummaryFilters();
+            applyTransactionsFilters();
+            // Show all if no filters
+            if (
+                document.querySelector('#transactionsFilters #dateFilter').value === 'all' &&
+                document.querySelector('#transactionsFilters #monthFilter').value === 'all' &&
+                document.querySelector('#transactionsFilters #yearFilter').value === 'all' &&
+                document.querySelector('#transactionsFilters #categoryFilter').value === 'all'
+            ) {
+                displayTransactions(transactions);
+            }
         }
 
         function updateDisplay() {
@@ -672,7 +716,300 @@
             document.getElementById('description').value = '';
         }
 
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set default year and month filters to current year and month
+            const now = new Date();
+            const currentYear = now.getFullYear().toString();
+            const currentMonth = (now.getMonth() + 1).toString();
+            // For summary tab
+            const summaryYear = document.querySelector('#summaryFilters #yearFilter');
+            const summaryMonth = document.querySelector('#summaryFilters #monthFilter');
+            if (summaryYear) summaryYear.value = currentYear;
+            if (summaryMonth) summaryMonth.value = currentMonth;
+            // For transactions tab
+            const transactionsYear = document.querySelector('#transactionsFilters #yearFilter');
+            const transactionsMonth = document.querySelector('#transactionsFilters #monthFilter');
+            if (transactionsYear) transactionsYear.value = currentYear;
+            if (transactionsMonth) transactionsMonth.value = currentMonth;
+
+            updateExpensePieChart(transactions);
+            updateYearlyBarChart(transactions);
+            applySummaryFilters();
+            applyTransactionsFilters();
+            // Always show all transactions in original UI if no filters are set
+            if (
+                document.querySelector('#transactionsFilters #dateFilter').value === 'all' &&
+                document.querySelector('#transactionsFilters #monthFilter').value === 'all' &&
+                document.querySelector('#transactionsFilters #yearFilter').value === 'all' &&
+                document.querySelector('#transactionsFilters #categoryFilter').value === 'all'
+            ) {
+                displayTransactions(transactions);
+            }
+        });
+
         loadTransactions();
+
+        function showTab(tab) {
+            document.getElementById('tabAddContent').style.display = tab === 'add' ? '' : 'none';
+            document.getElementById('tabSummaryContent').style.display = tab === 'summary' ? '' : 'none';
+            document.getElementById('tabTransactionsContent').style.display = tab === 'transactions' ? '' : 'none';
+            document.getElementById('tabAdd').classList.toggle('active', tab === 'add');
+            document.getElementById('tabSummary').classList.toggle('active', tab === 'summary');
+            document.getElementById('tabTransactions').classList.toggle('active', tab === 'transactions');
+        }
+        // Show summary tab by default if there are transactions, else show add tab
+        document.addEventListener('DOMContentLoaded', function() {
+            if (transactions && transactions.length > 0) {
+                showTab('summary');
+            } else {
+                showTab('add');
+            }
+        });
+
+        function getSummaryFilters() {
+            return {
+                dateFilter: document.querySelector('#summaryFilters #dateFilter').value,
+                monthFilter: document.querySelector('#summaryFilters #monthFilter').value,
+                yearFilter: document.querySelector('#summaryFilters #yearFilter').value,
+                categoryFilter: document.querySelector('#summaryFilters #categoryFilter').value
+            };
+        }
+        function getTransactionsFilters() {
+            return {
+                dateFilter: document.querySelector('#transactionsFilters #dateFilter').value,
+                monthFilter: document.querySelector('#transactionsFilters #monthFilter').value,
+                yearFilter: document.querySelector('#transactionsFilters #yearFilter').value,
+                categoryFilter: document.querySelector('#transactionsFilters #categoryFilter').value
+            };
+        }
+        function applySummaryFilters() {
+            const {dateFilter, monthFilter, yearFilter, categoryFilter} = getSummaryFilters();
+            const filteredTransactions = transactions.filter(transaction => {
+                const transactionDate = new Date(transaction.date);
+                const today = new Date();
+                // Date filter
+                if (dateFilter !== 'all') {
+                    if (dateFilter === 'today') {
+                        if (transactionDate.toDateString() !== today.toDateString()) return false;
+                    } else if (dateFilter === 'week') {
+                        const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+                        if (transactionDate < weekAgo) return false;
+                    } else if (dateFilter === 'month') {
+                        if (transactionDate.getMonth() !== today.getMonth() || 
+                            transactionDate.getFullYear() !== today.getFullYear()) return false;
+                    }
+                }
+                // Month filter
+                if (monthFilter !== 'all' && transactionDate.getMonth() + 1 !== parseInt(monthFilter)) return false;
+                // Year filter
+                if (yearFilter !== 'all' && transactionDate.getFullYear() !== parseInt(yearFilter)) return false;
+                // Category/type filter
+                if (categoryFilter === 'all_income') {
+                    if (transaction.type !== 'income') return false;
+                } else if (categoryFilter === 'all_expense') {
+                    if (transaction.type !== 'expense') return false;
+                } else if (categoryFilter !== 'all' && transaction.category !== categoryFilter) {
+                    return false;
+                }
+                return true;
+            });
+            updateExpensePieChart(filteredTransactions);
+            updateYearlyBarChart(filteredTransactions);
+            // Optionally update balances if you want them filtered as well
+        }
+        function applyTransactionsFilters() {
+            const {dateFilter, monthFilter, yearFilter, categoryFilter} = getTransactionsFilters();
+            const filteredTransactions = transactions.filter(transaction => {
+                const transactionDate = new Date(transaction.date);
+                const today = new Date();
+                // Date filter
+                if (dateFilter !== 'all') {
+                    if (dateFilter === 'today') {
+                        if (transactionDate.toDateString() !== today.toDateString()) return false;
+                    } else if (dateFilter === 'week') {
+                        const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+                        if (transactionDate < weekAgo) return false;
+                    } else if (dateFilter === 'month') {
+                        if (transactionDate.getMonth() !== today.getMonth() || 
+                            transactionDate.getFullYear() !== today.getFullYear()) return false;
+                    }
+                }
+                // Month filter
+                if (monthFilter !== 'all' && transactionDate.getMonth() + 1 !== parseInt(monthFilter)) return false;
+                // Year filter
+                if (yearFilter !== 'all' && transactionDate.getFullYear() !== parseInt(yearFilter)) return false;
+                // Category/type filter
+                if (categoryFilter === 'all_income') {
+                    if (transaction.type !== 'income') return false;
+                } else if (categoryFilter === 'all_expense') {
+                    if (transaction.type !== 'expense') return false;
+                } else if (categoryFilter !== 'all' && transaction.category !== categoryFilter) {
+                    return false;
+                }
+                return true;
+            });
+            displayTransactions(filteredTransactions);
+        }
+        // Attach filter change events
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('#summaryFilters select').forEach(sel => sel.addEventListener('change', applySummaryFilters));
+            document.querySelectorAll('#transactionsFilters select').forEach(sel => sel.addEventListener('change', applyTransactionsFilters));
+            applySummaryFilters();
+            applyTransactionsFilters();
+        });
+
+        let expensePieChartInstance = null;
+        let yearlyBarChartInstance = null;
+
+        function updateExpensePieChart(filteredTransactions) {
+            // Only consider expense transactions
+            const expenseTransactions = filteredTransactions.filter(t => t.type === 'expense' && t.category !== 'Credit Card');
+            const categorySums = {};
+            let total = 0;
+            expenseTransactions.forEach(t => {
+                if (!categorySums[t.category]) categorySums[t.category] = 0;
+                categorySums[t.category] += t.amount;
+                total += t.amount;
+            });
+            const categories = Object.keys(categorySums);
+            const data = categories.map(cat => categorySums[cat]);
+            const backgroundColors = [
+                '#4CAF50', '#f44336', '#2196F3', '#FF9800', '#9C27B0', '#00BCD4', '#8BC34A', '#FFC107', '#E91E63', '#795548', '#607D8B', '#FF5722'
+            ];
+            const ctx = document.getElementById('expensePieChart').getContext('2d');
+            if (expensePieChartInstance) expensePieChartInstance.destroy();
+            if (total > 0) {
+                expensePieChartInstance = new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: categories,
+                        datasets: [{
+                            data: data,
+                            backgroundColor: backgroundColors.slice(0, categories.length),
+                        }]
+                    },
+                    options: {
+                        plugins: {
+                            legend: { position: 'bottom' },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const label = context.label || '';
+                                        const value = context.parsed;
+                                        const percent = total ? ((value / total) * 100).toFixed(1) : 0;
+                                        return `${label}: ₹${value} (${percent}%)`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+                document.getElementById('expenseSum').textContent = `Total Expenses: ₹${total}`;
+            } else {
+                // Show empty chart with a label
+                expensePieChartInstance = new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: ['No expense data'],
+                        datasets: [{
+                            data: [1],
+                            backgroundColor: ['#e0e0e0'],
+                        }]
+                    },
+                    options: {
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: { enabled: false },
+                        }
+                    }
+                });
+                document.getElementById('expenseSum').textContent = '';
+            }
+            document.getElementById('expensePieChart').style.display = 'block';
+        }
+
+        function updateYearlyBarChart(filteredTransactions) {
+            // Determine year to show
+            const yearFilter = document.getElementById('yearFilter')?.value || 'all';
+            let year = yearFilter === 'all' ? (new Date()).getFullYear() : parseInt(yearFilter);
+            // Prepare data
+            let incomeByMonth = Array(12).fill(0);
+            let expenseByMonth = Array(12).fill(0);
+            filteredTransactions.forEach(t => {
+                const d = new Date(t.date);
+                if (d.getFullYear() === year) {
+                    if (t.type === 'income') incomeByMonth[d.getMonth()] += t.amount;
+                    if (t.type === 'expense' && t.category !== 'Credit Card') expenseByMonth[d.getMonth()] += t.amount;
+                }
+            });
+            const ctx = document.getElementById('yearlyBarChart').getContext('2d');
+            if (yearlyBarChartInstance) yearlyBarChartInstance.destroy();
+            yearlyBarChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                    datasets: [
+                        {
+                            label: 'Income',
+                            data: incomeByMonth,
+                            backgroundColor: 'rgba(76, 175, 80, 0.7)'
+                        },
+                        {
+                            label: 'Expense',
+                            data: expenseByMonth,
+                            backgroundColor: 'rgba(244, 67, 54, 0.7)'
+                        }
+                    ]
+                },
+                options: {
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    },
+                    responsive: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) { return '₹' + value; }
+                            }
+                        }
+                    }
+                }
+            });
+            document.getElementById('yearlyBarLabel').textContent = `Yearly Income & Expense (${year})`;
+            document.getElementById('yearlyBarChart').style.display = 'block';
+        }
+
+        function displayTransactions(transactionsToShow) {
+            const transactionsDiv = document.getElementById('transactions');
+            transactionsDiv.innerHTML = '';
+
+            transactionsToShow.forEach(transaction => {
+                const div = document.createElement('div');
+                div.className = `transaction ${transaction.type}`;
+                div.style.display = 'flex';
+                div.style.justifyContent = 'space-between';
+                div.style.alignItems = 'center';
+                div.style.padding = '15px';
+                div.style.margin = '10px 0';
+                div.style.backgroundColor = 'white';
+                div.style.borderRadius = '8px';
+                div.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+                div.style.transition = 'transform 0.2s';
+                div.style.borderLeft = transaction.type === 'income' ? '4px solid #28a745' : '4px solid #dc3545';
+
+                div.innerHTML = `
+                    <div class="transaction-date" style="min-width:100px; color:#6c757d;">${new Date(transaction.date).toLocaleDateString()}</div>
+                    <div class="transaction-category" style="min-width:120px; color:#495057; font-weight:500;">${transaction.category}</div>
+                    <div class="transaction-description" style="flex-grow:1; color:#212529;">${transaction.description}</div>
+                    <div class="transaction-amount" style="min-width:100px; text-align:right; font-weight:bold; color:${transaction.type === 'income' ? '#28a745' : '#dc3545'};">₹${transaction.amount}</div>
+                    <div class="transaction-actions">
+                        <button class="delete-button" onclick="deleteTransaction(${transaction.id})">Delete</button>
+                    </div>
+                `;
+                transactionsDiv.appendChild(div);
+            });
+        }
     </script>
 </body>
 </html>
