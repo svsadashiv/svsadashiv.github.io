@@ -123,6 +123,12 @@
             color: #666;
             margin-bottom: 10px;
         }
+
+        #creditCardDue {
+            color: #FF9800;
+            font-size: 24px;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -219,6 +225,10 @@
         <div class="summary-item">
             <h3>Total Expenses</h3>
             <p id="totalExpenses">₹0</p>
+        </div>
+        <div class="summary-item">
+            <h3>Credit Card Due</h3>
+            <p id="creditCardDue">₹0</p>
         </div>
         <div class="summary-item">
             <h3>Balance</h3>
@@ -548,34 +558,46 @@
 
             let totalIncome = 0;
             let totalExpenses = 0;
+            let creditCardDue = 0;
 
             transactions.sort((a, b) => new Date(b.date) - new Date(a.date));
 
             transactions.forEach(transaction => {
+                if (transaction.type === 'income') {
+                    totalIncome += transaction.amount;
+                } else {
+                    // Handle expenses based on payment mode and category
+                    if (transaction.category === 'Credit Card') {
+                        // Only update credit card due when settling credit card bill
+                        creditCardDue -= transaction.amount;
+                    } else {
+                        // Add all other expenses to total expenses
+                        totalExpenses += transaction.amount;
+                        
+                        // If paid with credit card, add to credit card due
+                        if (transaction.paymentMode === 'credit') {
+                            creditCardDue += transaction.amount;
+                        }
+                    }
+                }
+
                 const div = document.createElement('div');
-                div.className = 'transaction-item';
+                div.className = `transaction ${transaction.type}`;
                 div.innerHTML = `
-                    <div>
-                        <strong class="${transaction.type}">${transaction.type}</strong>
-                        <p>${transaction.category} - ${transaction.paymentMode}</p>
-                        <small>${transaction.date} - ${transaction.description}</small>
-                    </div>
-                    <div>
-                        <strong class="${transaction.type}">₹${transaction.amount}</strong>
+                    <div class="transaction-date">${new Date(transaction.date).toLocaleDateString()}</div>
+                    <div class="transaction-category">${transaction.category}</div>
+                    <div class="transaction-description">${transaction.description}</div>
+                    <div class="transaction-amount">₹${transaction.amount}</div>
+                    <div class="transaction-actions">
                         <button class="delete-button" onclick="deleteTransaction(${transaction.id})">Delete</button>
                     </div>
                 `;
                 transactionsList.appendChild(div);
-
-                if (transaction.type === 'income') {
-                    totalIncome += transaction.amount;
-                } else {
-                    totalExpenses += transaction.amount;
-                }
             });
 
             document.getElementById('totalIncome').textContent = `₹${totalIncome}`;
             document.getElementById('totalExpenses').textContent = `₹${totalExpenses}`;
+            document.getElementById('creditCardDue').textContent = `₹${Math.max(0, creditCardDue)}`;
             document.getElementById('balance').textContent = `₹${totalIncome - totalExpenses}`;
         }
 
