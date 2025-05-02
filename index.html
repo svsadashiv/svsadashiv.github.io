@@ -129,6 +129,64 @@
             font-size: 24px;
             font-weight: bold;
         }
+
+        /* Responsive styles for mobile */
+        @media (max-width: 600px) {
+            body {
+                padding: 5px;
+            }
+            .form-container, .transaction-list {
+                padding: 10px;
+                border-radius: 6px;
+            }
+            .summary {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+            .summary-item {
+                padding: 10px;
+                font-size: 16px;
+            }
+            .filters {
+                flex-direction: column;
+                gap: 10px;
+                padding: 8px;
+            }
+            .filter-group {
+                min-width: 0;
+            }
+            .input-group label, .filter-group label {
+                font-size: 13px;
+            }
+            .input-group input, .input-group select, .filter-select {
+                font-size: 15px;
+                padding: 7px;
+            }
+            .submit-button, .delete-button {
+                width: 100%;
+                margin: 5px 0;
+                font-size: 16px;
+                padding: 12px 0;
+            }
+            .transaction {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 5px;
+                padding: 10px 5px;
+            }
+            .transaction-date, .transaction-category, .transaction-description, .transaction-amount, .transaction-actions {
+                min-width: 0;
+                width: 100%;
+                text-align: left;
+                font-size: 15px;
+            }
+            h1 {
+                font-size: 22px;
+            }
+            h2 {
+                font-size: 18px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -279,6 +337,8 @@
                 <label for="categoryFilter">Category:</label>
                 <select id="categoryFilter" class="filter-select" onchange="applyFilters()">
                     <option value="all">All Categories</option>
+                    <option value="all_income">All Incomes</option>
+                    <option value="all_expense">All Expenses</option>
                     <optgroup label="Income">
                         <option value="Salary">Salary</option>
                         <option value="Freelance">Freelance</option>
@@ -432,8 +492,14 @@
                     // Year filter
                     if (yearFilter !== 'all' && transactionDate.getFullYear() !== parseInt(yearFilter)) return false;
 
-                    // Category filter
-                    if (categoryFilter !== 'all' && transaction.category !== categoryFilter) return false;
+                    // Category/type filter
+                    if (categoryFilter === 'all_income') {
+                        if (transaction.type !== 'income') return false;
+                    } else if (categoryFilter === 'all_expense') {
+                        if (transaction.type !== 'expense') return false;
+                    } else if (categoryFilter !== 'all' && transaction.category !== categoryFilter) {
+                        return false;
+                    }
 
                     return true;
                 });
