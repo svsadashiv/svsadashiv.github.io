@@ -630,7 +630,7 @@
                     <div class="transaction-date" style="min-width:100px; color:#6c757d;">${new Date(transaction.date).toLocaleDateString()}</div>
                     <div class="transaction-category" style="min-width:120px; color:#495057; font-weight:500;">${transaction.category}</div>
                     <div class="transaction-description" style="flex-grow:1; color:#212529;">${transaction.description}</div>
-                    <div class="transaction-amount" style="min-width:100px; text-align:right; font-weight:bold; color:${transaction.type === 'income' ? '#28a745' : '#dc3545'};">₹${transaction.amount}</div>
+                    <div class="transaction-amount" style="min-width:100px; text-align:right; font-weight:bold; color:${transaction.type === 'income' ? '#28a745' : '#dc3545'};">₹${Number(transaction.amount).toFixed(2)}</div>
                     <div class="transaction-actions">
                         <button class="delete-button" onclick="deleteTransaction(${transaction.id})">Delete</button>
                         <button class="submit-button" style="background:#2196F3; color:white; margin-left:5px;" onclick="editTransaction(${transaction.id})">Edit</button>
@@ -758,7 +758,7 @@
                     <div class="transaction-date">${new Date(transaction.date).toLocaleDateString()}</div>
                     <div class="transaction-category">${transaction.category}</div>
                     <div class="transaction-description">${transaction.description}</div>
-                    <div class="transaction-amount">₹${transaction.amount}</div>
+                    <div class="transaction-amount">₹${Number(transaction.amount).toFixed(2)}</div>
                     <div class="transaction-actions">
                         <button class="delete-button" onclick="deleteTransaction(${transaction.id})">Delete</button>
                     </div>
@@ -766,8 +766,8 @@
                 transactionsList.appendChild(div);
             });
 
-            document.getElementById('totalIncome').textContent = `₹${totalIncome}`;
-            document.getElementById('totalExpenses').textContent = `₹${totalExpenses}`;
+            document.getElementById('totalIncome').textContent = `₹${Number(totalIncome).toFixed(2)}`;
+            document.getElementById('totalExpenses').textContent = `₹${Number(totalExpenses).toFixed(2)}`;
             document.getElementById('creditCardDue').textContent = `₹${Math.max(0, creditCardDue).toFixed(2)}`;
             document.getElementById('balance').textContent = `₹${(totalIncome - totalExpenses).toFixed(2)}`;
         }
@@ -935,7 +935,7 @@
                 total += t.amount;
             });
             const categories = Object.keys(categorySums);
-            const data = categories.map(cat => categorySums[cat]);
+            const data = categories.map(cat => Number(categorySums[cat]).toFixed(2));
             const backgroundColors = [
                 '#4CAF50', '#f44336', '#2196F3', '#FF9800', '#9C27B0', '#00BCD4', '#8BC34A', '#FFC107', '#E91E63', '#795548', '#607D8B', '#FF5722'
             ];
@@ -959,8 +959,8 @@
                                 callbacks: {
                                     label: function(context) {
                                         const label = context.label || '';
-                                        const value = context.parsed;
-                                        const percent = total ? ((value / total) * 100).toFixed(1) : 0;
+                                        const value = Number(context.parsed).toFixed(2);
+                                        const percent = total ? ((context.parsed / total) * 100).toFixed(1) : 0;
                                         return `${label}: ₹${value} (${percent}%)`;
                                     }
                                 }
@@ -968,7 +968,7 @@
                         }
                     }
                 });
-                document.getElementById('expenseSum').textContent = `Total Expenses: ₹${total}`;
+                document.getElementById('expenseSum').textContent = `Total Expenses: ₹${Number(total).toFixed(2)}`;
             } else {
                 // Show empty chart with a label
                 expensePieChartInstance = new Chart(ctx, {
@@ -1007,6 +1007,9 @@
                     if (t.type === 'expense' && t.category !== 'Credit Card') expenseByMonth[d.getMonth()] += t.amount;
                 }
             });
+            // Round values
+            incomeByMonth = incomeByMonth.map(v => Number(v).toFixed(2));
+            expenseByMonth = expenseByMonth.map(v => Number(v).toFixed(2));
             const ctx = document.getElementById('yearlyBarChart').getContext('2d');
             if (yearlyBarChartInstance) yearlyBarChartInstance.destroy();
             yearlyBarChartInstance = new Chart(ctx, {
