@@ -364,6 +364,10 @@
                     reader.onload = function(e) {
                         try {
                             const importedTransactions = JSON.parse(e.target.result);
+                            if (!Array.isArray(importedTransactions) || importedTransactions.length > 1000) {
+                                alert('Too many transactions in file (max 1000 allowed).');
+                                return;
+                            }
                             transactions = importedTransactions;
                             saveTransactions();
                             updateDisplay();
@@ -626,16 +630,62 @@
                 div.style.transition = 'transform 0.2s';
                 div.style.borderLeft = transaction.type === 'income' ? '4px solid #28a745' : '4px solid #dc3545';
 
-                div.innerHTML = `
-                    <div class="transaction-date" style="min-width:100px; color:#6c757d;">${new Date(transaction.date).toLocaleDateString()}</div>
-                    <div class="transaction-category" style="min-width:120px; color:#495057; font-weight:500;">${transaction.category}</div>
-                    <div class="transaction-description" style="flex-grow:1; color:#212529;">${transaction.description}</div>
-                    <div class="transaction-amount" style="min-width:100px; text-align:right; font-weight:bold; color:${transaction.type === 'income' ? '#28a745' : '#dc3545'};">₹${Number(transaction.amount).toFixed(2)}</div>
-                    <div class="transaction-actions">
-                        <button class="delete-button" onclick="deleteTransaction(${transaction.id})">Delete</button>
-                        <button class="submit-button" style="background:#2196F3; color:white; margin-left:5px;" onclick="editTransaction(${transaction.id})">Edit</button>
-                    </div>
-                `;
+                // Date
+                const dateDiv = document.createElement('div');
+                dateDiv.className = 'transaction-date';
+                dateDiv.style.minWidth = '100px';
+                dateDiv.style.color = '#6c757d';
+                dateDiv.textContent = new Date(transaction.date).toLocaleDateString();
+
+                // Category
+                const categoryDiv = document.createElement('div');
+                categoryDiv.className = 'transaction-category';
+                categoryDiv.style.minWidth = '120px';
+                categoryDiv.style.color = '#495057';
+                categoryDiv.style.fontWeight = '500';
+                categoryDiv.textContent = transaction.category;
+
+                // Description
+                const descDiv = document.createElement('div');
+                descDiv.className = 'transaction-description';
+                descDiv.style.flexGrow = '1';
+                descDiv.style.color = '#212529';
+                descDiv.textContent = transaction.description;
+
+                // Amount
+                const amountDiv = document.createElement('div');
+                amountDiv.className = 'transaction-amount';
+                amountDiv.style.minWidth = '100px';
+                amountDiv.style.textAlign = 'right';
+                amountDiv.style.fontWeight = 'bold';
+                amountDiv.style.color = transaction.type === 'income' ? '#28a745' : '#dc3545';
+                amountDiv.textContent = `₹${Number(transaction.amount).toFixed(2)}`;
+
+                // Actions
+                const actionsDiv = document.createElement('div');
+                actionsDiv.className = 'transaction-actions';
+                // Delete button
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'delete-button';
+                deleteBtn.textContent = 'Delete';
+                deleteBtn.onclick = function() { deleteTransaction(transaction.id); };
+                // Edit button
+                const editBtn = document.createElement('button');
+                editBtn.className = 'submit-button';
+                editBtn.style.background = '#2196F3';
+                editBtn.style.color = 'white';
+                editBtn.style.marginLeft = '5px';
+                editBtn.textContent = 'Edit';
+                editBtn.onclick = function() { editTransaction(transaction.id); };
+                actionsDiv.appendChild(deleteBtn);
+                actionsDiv.appendChild(editBtn);
+
+                div.appendChild(dateDiv);
+                div.appendChild(categoryDiv);
+                div.appendChild(descDiv);
+                div.appendChild(amountDiv);
+                div.appendChild(actionsDiv);
+
                 transactionsDiv.appendChild(div);
             });
         }
@@ -660,13 +710,18 @@
         function addOrUpdateTransaction() {
             const type = document.getElementById('type').value;
             const category = document.getElementById('category').value;
-            const amount = parseFloat(parseFloat(document.getElementById('amount').value).toFixed(2));
+            const amountRaw = document.getElementById('amount').value;
+            const amount = parseFloat(parseFloat(amountRaw).toFixed(2));
             const paymentMode = document.getElementById('paymentMode').value;
             const date = document.getElementById('date').value;
             const description = document.getElementById('description').value;
 
-            if (!amount || !date) {
-                alert('Please fill in all required fields');
+            if (!amountRaw || isNaN(amount) || amount <= 0) {
+                alert('Please enter a valid positive amount');
+                return;
+            }
+            if (!date || isNaN(new Date(date).getTime())) {
+                alert('Please enter a valid date');
                 return;
             }
 
@@ -924,6 +979,11 @@
         let expensePieChartInstance = null;
         let yearlyBarChartInstance = null;
 
+        // Helper to sanitize text for Chart.js labels
+        function sanitizeLabel(str) {
+            return String(str).replace(/[<>"'&]/g, '');
+        }
+
         function updateExpensePieChart(filteredTransactions) {
             // Only consider expense transactions
             const expenseTransactions = filteredTransactions.filter(t => t.type === 'expense' && t.category !== 'Credit Card');
@@ -934,7 +994,7 @@
                 categorySums[t.category] += t.amount;
                 total += t.amount;
             });
-            const categories = Object.keys(categorySums);
+            const categories = Object.keys(categorySums).map(sanitizeLabel);
             const data = categories.map(cat => Number(categorySums[cat]).toFixed(2));
             const backgroundColors = [
                 '#4CAF50', '#f44336', '#2196F3', '#FF9800', '#9C27B0', '#00BCD4', '#8BC34A', '#FFC107', '#E91E63', '#795548', '#607D8B', '#FF5722'
