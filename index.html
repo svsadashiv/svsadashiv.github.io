@@ -467,7 +467,7 @@
                         <option value="Rent">Rent</option>
                         <option value="Transport">Transport</option>
                         <option value="Trip">Trip</option>
-                        <option value="Loan Given">Loan Given</option>
+                        <option value="Shopping">Shopping</option>
                         <option value="Miscellaneous">Miscellaneous</option>
                         <option value="Other">Other</option>
                     </optgroup>
@@ -525,13 +525,12 @@
     <div id="tabTransactionsContent" style="display:none;">
         <div class="filters" id="transactionsFilters">
             <div class="filter-group">
-                <label for="dateFilter">Date:</label>
+                <label for="dateFilter">Date Range:</label>
                 <select id="dateFilter" class="filter-select" onchange="applyTransactionsFilters()">
-                    <option value="all" selected>All Dates</option>
+                    <option value="all">All Dates</option>
                     <option value="today">Today</option>
-                    <option value="yesterday">Yesterday</option>
-                    <option value="this_week">This Week</option>
-                    <option value="last_week">Last Week</option>
+                    <option value="week">This Week</option>
+                    <option value="month">This Month</option>
                 </select>
             </div>
             <div class="filter-group">
@@ -586,16 +585,9 @@
                         <option value="Rent">Rent</option>
                         <option value="Transport">Transport</option>
                         <option value="Trip">Trip</option>
-                        <option value="Loan Given">Loan Given</option>
+                        <option value="Shopping">Shopping</option>
                         <option value="Miscellaneous">Miscellaneous</option>
                         <option value="Other">Other</option>
-                    </optgroup>
-                    <optgroup label="Loans">
-                        <option value="Loan Given">Loan Given</option>
-                        <option value="Loan Received">Loan Received</option>
-                        <option value="Received Back">Received Back</option>
-                        <option value="Paid Back">Paid Back</option>
-                        <option value="EMI">EMI</option>
                     </optgroup>
                 </select>
             </div>
@@ -609,7 +601,7 @@
     <script>
         const categories = {
             income: ['Salary', 'Freelance', 'Investment', 'Other'],
-            expense: ['Bills', 'Credit Card', 'Entertainment', 'EMI', 'Food', 'Home', 'Health', 'Rent', 'Transport', 'Trip', 'Miscellaneous', 'Other'],
+            expense: ['Bills', 'Credit Card', 'Entertainment', 'EMI', 'Food', 'Home', 'Health', 'Rent', 'Transport', 'Trip', 'Shopping', 'Miscellaneous', 'Other'],
             loan: ['Loan Given', 'Loan Received', 'Received Back', 'Paid Back', 'EMI']
         };
 
@@ -668,16 +660,26 @@
             
             // Set default date filter to "All Dates"
             document.getElementById('dateFilter').value = 'all';
-            
-            // Set default month filter to current month
-            const currentMonth = new Date().getMonth() + 1; // getMonth() returns 0-11
-            document.getElementById('monthFilter').value = currentMonth.toString();
-            
-            // Initialize other filters
+            document.querySelector('#transactionsFilters #dateFilter').value = 'all';
+
+            // Set default month to current month in both tabs
+            const currentMonth = new Date().getMonth() + 1;
+            document.getElementById('monthFilter').value = currentMonth;
+            document.querySelector('#transactionsFilters #monthFilter').value = currentMonth;
+
             updateExpensePieChart(transactions);
             updateYearlyBarChart(transactions);
             applySummaryFilters();
             applyTransactionsFilters();
+            // Always show all transactions in original UI if no filters are set
+            if (
+                document.querySelector('#transactionsFilters #dateFilter').value === 'all' &&
+                document.querySelector('#transactionsFilters #monthFilter').value === 'all' &&
+                document.querySelector('#transactionsFilters #yearFilter').value === 'all' &&
+                document.querySelector('#transactionsFilters #categoryFilter').value === 'all'
+            ) {
+                displayTransactions(transactions);
+            }
         });
 
         let transactions = [];
@@ -1176,34 +1178,22 @@
             const filteredTransactions = transactions.filter(transaction => {
                 const transactionDate = new Date(transaction.date);
                 const today = new Date();
-                
                 // Date filter
                 if (dateFilter !== 'all') {
                     if (dateFilter === 'today') {
                         if (transactionDate.toDateString() !== today.toDateString()) return false;
-                    } else if (dateFilter === 'yesterday') {
-                        const yesterday = new Date(today);
-                        yesterday.setDate(yesterday.getDate() - 1);
-                        if (transactionDate.toDateString() !== yesterday.toDateString()) return false;
-                    } else if (dateFilter === 'this_week') {
-                        const weekStart = new Date(today);
-                        weekStart.setDate(today.getDate() - today.getDay());
-                        if (transactionDate < weekStart) return false;
-                    } else if (dateFilter === 'last_week') {
-                        const lastWeekStart = new Date(today);
-                        lastWeekStart.setDate(today.getDate() - today.getDay() - 7);
-                        const lastWeekEnd = new Date(today);
-                        lastWeekEnd.setDate(today.getDate() - today.getDay() - 1);
-                        if (transactionDate < lastWeekStart || transactionDate > lastWeekEnd) return false;
+                    } else if (dateFilter === 'week') {
+                        const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+                        if (transactionDate < weekAgo) return false;
+                    } else if (dateFilter === 'month') {
+                        if (transactionDate.getMonth() !== today.getMonth() || 
+                            transactionDate.getFullYear() !== today.getFullYear()) return false;
                     }
                 }
-                
                 // Month filter
                 if (monthFilter !== 'all' && transactionDate.getMonth() + 1 !== parseInt(monthFilter)) return false;
-                
                 // Year filter
                 if (yearFilter !== 'all' && transactionDate.getFullYear() !== parseInt(yearFilter)) return false;
-                
                 // Category/type filter
                 if (categoryFilter === 'all_income') {
                     if (transaction.type !== 'income') return false;
@@ -1388,7 +1378,31 @@
             let loansReceived = 0;
             let loanAmount = 0;
 
-            // Calculate filtered totals
+            // Get the filter date if any date filter is applied
+            const {dateFilter, monthFilter, yearFilter} = getSummaryFilters();
+            let filterDate = null;
+            
+            if (dateFilter !== 'all') {
+                const today = new Date();
+                if (dateFilter === 'today') {
+                    filterDate = today;
+                } else if (dateFilter === 'yesterday') {
+                    filterDate = new Date(today);
+                    filterDate.setDate(today.getDate() - 1);
+                } else if (dateFilter === 'this_week') {
+                    filterDate = new Date(today);
+                    filterDate.setDate(today.getDate() - today.getDay());
+                } else if (dateFilter === 'last_week') {
+                    filterDate = new Date(today);
+                    filterDate.setDate(today.getDate() - today.getDay() - 7);
+                }
+            } else if (monthFilter !== 'all' || yearFilter !== 'all') {
+                const year = yearFilter !== 'all' ? parseInt(yearFilter) : new Date().getFullYear();
+                const month = monthFilter !== 'all' ? parseInt(monthFilter) - 1 : new Date().getMonth();
+                filterDate = new Date(year, month, 1);
+            }
+
+            // Calculate filtered totals for display
             filteredTransactions.forEach(transaction => {
                 if (transaction.type === 'income') {
                     totalIncome += transaction.amount;
@@ -1427,66 +1441,50 @@
                 }
             });
 
-            // Calculate unfiltered totals for credit card, loans given, and loans received
-            let unfilteredCreditCardDue = 0;
-            let unfilteredLoansGiven = 0;
-            let unfilteredLoansReceived = 0;
+            // Calculate totals including previous dues
+            let totalCreditCardDue = creditCardDue;
+            let totalLoansGiven = loansGiven;
+            let totalLoansReceived = loansReceived;
 
-            transactions.forEach(transaction => {
-                if (transaction.type === 'expense') {
-                    if (transaction.category === 'Credit Card') {
-                        unfilteredCreditCardDue -= transaction.amount;
-                    } else if (transaction.paymentMode === 'credit') {
-                        unfilteredCreditCardDue += transaction.amount;
+            // Add previous dues if a filter date is set
+            if (filterDate) {
+                transactions.forEach(transaction => {
+                    const transactionDate = new Date(transaction.date);
+                    if (transactionDate < filterDate) {
+                        if (transaction.type === 'expense') {
+                            if (transaction.category === 'Credit Card') {
+                                totalCreditCardDue -= transaction.amount;
+                            } else if (transaction.paymentMode === 'credit') {
+                                totalCreditCardDue += transaction.amount;
+                            }
+                        } else if (transaction.type === 'loan') {
+                            switch(transaction.category) {
+                                case 'Loan Given':
+                                    totalLoansGiven += transaction.amount;
+                                    break;
+                                case 'Received Back':
+                                    totalLoansGiven -= transaction.amount;
+                                    break;
+                                case 'Loan Received':
+                                    totalLoansReceived += transaction.amount;
+                                    break;
+                                case 'Paid Back':
+                                case 'EMI':
+                                    totalLoansReceived -= transaction.amount;
+                                    break;
+                            }
+                        }
                     }
-                } else if (transaction.type === 'loan') {
-                    switch(transaction.category) {
-                        case 'Loan Given':
-                            unfilteredLoansGiven += transaction.amount;
-                            break;
-                        case 'Received Back':
-                            unfilteredLoansGiven -= transaction.amount;
-                            break;
-                        case 'Loan Received':
-                            unfilteredLoansReceived += transaction.amount;
-                            break;
-                        case 'Paid Back':
-                        case 'EMI':
-                            unfilteredLoansReceived -= transaction.amount;
-                            break;
-                    }
-                }
-            });
+                });
+            }
 
             document.getElementById('totalIncome').textContent = `₹${Number(totalIncome).toFixed(2)}`;
             document.getElementById('totalExpenses').textContent = `₹${Number(totalExpenses).toFixed(2)}`;
-            document.getElementById('creditCardDue').textContent = `₹${Math.max(0, unfilteredCreditCardDue).toFixed(2)}`;
+            document.getElementById('creditCardDue').textContent = `₹${Math.max(0, totalCreditCardDue).toFixed(2)}`;
             document.getElementById('balance').textContent = `₹${(totalIncome - totalExpenses + loanAmount).toFixed(2)}`;
-            document.getElementById('loansGiven').textContent = `₹${Number(unfilteredLoansGiven).toFixed(2)}`;
-            document.getElementById('loansReceived').textContent = `₹${Number(unfilteredLoansReceived).toFixed(2)}`;
+            document.getElementById('loansGiven').textContent = `₹${Number(totalLoansGiven).toFixed(2)}`;
+            document.getElementById('loansReceived').textContent = `₹${Number(totalLoansReceived).toFixed(2)}`;
         }
-
-        // Initialize filters on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            // Set default date filter to "All Dates" for both tabs
-            document.querySelectorAll('#dateFilter').forEach(filter => {
-                filter.value = 'all';
-            });
-            
-            // Set default month filter to current month for both tabs
-            const currentMonth = new Date().getMonth() + 1; // getMonth() returns 0-11
-            const summaryMonthFilter = document.querySelector('#summaryFilters #monthFilter');
-            const transactionsMonthFilter = document.querySelector('#transactionsFilters #monthFilter');
-            
-            if (summaryMonthFilter) summaryMonthFilter.value = currentMonth.toString();
-            if (transactionsMonthFilter) transactionsMonthFilter.value = currentMonth.toString();
-            
-            // Initialize other filters
-            updateExpensePieChart(transactions);
-            updateYearlyBarChart(transactions);
-            applySummaryFilters();
-            applyTransactionsFilters();
-        });
     </script>
 </body>
 </html>
