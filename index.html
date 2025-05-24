@@ -131,6 +131,18 @@
             font-weight: bold;
         }
 
+        #loansGiven {
+            color: #2196F3;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        #loansReceived {
+            color: #FF9800;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
         /* Responsive styles for mobile */
         @media (max-width: 600px) {
             body {
@@ -300,6 +312,7 @@
                 <select id="type">
                     <option value="expense">Expense</option>
                     <option value="income">Income</option>
+                    <option value="loan">Loan</option>
                 </select>
             </div>
 
@@ -333,6 +346,11 @@
             <div class="input-group">
                 <label for="description">Description</label>
                 <input type="text" id="description">
+            </div>
+
+            <div class="input-group">
+                <label for="person">Person Name</label>
+                <input type="text" id="person" placeholder="Enter person's name">
             </div>
 
             <button class="submit-button" id="addOrUpdateBtn" onclick="addOrUpdateTransaction()">Add Transaction</button>
@@ -386,32 +404,15 @@
 
     <!-- Summary Tab -->
     <div id="tabSummaryContent" style="display:none;">
-        <div class="summary">
-            <div class="summary-item">
-                <h3>Total Income</h3>
-                <p id="totalIncome">₹0</p>
-            </div>
-            <div class="summary-item">
-                <h3>Total Expenses</h3>
-                <p id="totalExpenses">₹0</p>
-            </div>
-            <div class="summary-item">
-                <h3>Credit Card Due</h3>
-                <p id="creditCardDue">₹0</p>
-            </div>
-            <div class="summary-item">
-                <h3>Balance</h3>
-                <p id="balance">₹0</p>
-            </div>
-        </div>
-        <div class="filters" id="summaryFilters">
+        <div class="filters" id="summaryFilters" style="margin-top: 0;">
             <div class="filter-group">
-                <label for="dateFilter">Date Range:</label>
+                <label for="dateFilter">Date:</label>
                 <select id="dateFilter" class="filter-select" onchange="applySummaryFilters()">
-                    <option value="all">All Dates</option>
+                    <option value="all" selected>All Dates</option>
                     <option value="today">Today</option>
-                    <option value="week">This Week</option>
-                    <option value="month">This Month</option>
+                    <option value="yesterday">Yesterday</option>
+                    <option value="this_week">This Week</option>
+                    <option value="last_week">Last Week</option>
                 </select>
             </div>
             <div class="filter-group">
@@ -447,10 +448,12 @@
                     <option value="all">All Categories</option>
                     <option value="all_income">All Incomes</option>
                     <option value="all_expense">All Expenses</option>
+                    <option value="all_loans">All Loans</option>
                     <optgroup label="Income">
                         <option value="Salary">Salary</option>
                         <option value="Freelance">Freelance</option>
                         <option value="Investment">Investment</option>
+                        <option value="Loan Repayment">Loan Repayment</option>
                         <option value="Other">Other</option>
                     </optgroup>
                     <optgroup label="Expense">
@@ -464,12 +467,48 @@
                         <option value="Rent">Rent</option>
                         <option value="Transport">Transport</option>
                         <option value="Trip">Trip</option>
+                        <option value="Loan Given">Loan Given</option>
                         <option value="Miscellaneous">Miscellaneous</option>
                         <option value="Other">Other</option>
+                    </optgroup>
+                    <optgroup label="Loans">
+                        <option value="Loan Given">Loan Given</option>
+                        <option value="Loan Received">Loan Received</option>
+                        <option value="Received Back">Received Back</option>
+                        <option value="Paid Back">Paid Back</option>
+                        <option value="EMI">EMI</option>
                     </optgroup>
                 </select>
             </div>
         </div>
+
+        <div class="summary">
+            <div class="summary-item">
+                <h3>Total Income</h3>
+                <p id="totalIncome">₹0</p>
+            </div>
+            <div class="summary-item">
+                <h3>Total Expenses</h3>
+                <p id="totalExpenses">₹0</p>
+            </div>
+            <div class="summary-item">
+                <h3>Credit Card Due</h3>
+                <p id="creditCardDue">₹0</p>
+            </div>
+            <div class="summary-item">
+                <h3>Balance</h3>
+                <p id="balance">₹0</p>
+            </div>
+            <div class="summary-item">
+                <h3>Loans Given</h3>
+                <p id="loansGiven">₹0</p>
+            </div>
+            <div class="summary-item">
+                <h3>Loans Due</h3>
+                <p id="loansReceived">₹0</p>
+            </div>
+        </div>
+
         <div style="margin: 30px 0; display: flex; justify-content: center; align-items: flex-start; gap: 20px; flex-wrap: wrap; width: 100%;">
             <div style="text-align:center; flex: 0 1 220px;">
                 <canvas id="expensePieChart" width="220" height="220" style="display:inline-block; max-width:220px; height:auto;"></canvas>
@@ -486,12 +525,13 @@
     <div id="tabTransactionsContent" style="display:none;">
         <div class="filters" id="transactionsFilters">
             <div class="filter-group">
-                <label for="dateFilter">Date Range:</label>
+                <label for="dateFilter">Date:</label>
                 <select id="dateFilter" class="filter-select" onchange="applyTransactionsFilters()">
-                    <option value="all">All Dates</option>
+                    <option value="all" selected>All Dates</option>
                     <option value="today">Today</option>
-                    <option value="week">This Week</option>
-                    <option value="month">This Month</option>
+                    <option value="yesterday">Yesterday</option>
+                    <option value="this_week">This Week</option>
+                    <option value="last_week">Last Week</option>
                 </select>
             </div>
             <div class="filter-group">
@@ -527,10 +567,12 @@
                     <option value="all">All Categories</option>
                     <option value="all_income">All Incomes</option>
                     <option value="all_expense">All Expenses</option>
+                    <option value="all_loans">All Loans</option>
                     <optgroup label="Income">
                         <option value="Salary">Salary</option>
                         <option value="Freelance">Freelance</option>
                         <option value="Investment">Investment</option>
+                        <option value="Loan Repayment">Loan Repayment</option>
                         <option value="Other">Other</option>
                     </optgroup>
                     <optgroup label="Expense">
@@ -544,8 +586,16 @@
                         <option value="Rent">Rent</option>
                         <option value="Transport">Transport</option>
                         <option value="Trip">Trip</option>
+                        <option value="Loan Given">Loan Given</option>
                         <option value="Miscellaneous">Miscellaneous</option>
                         <option value="Other">Other</option>
+                    </optgroup>
+                    <optgroup label="Loans">
+                        <option value="Loan Given">Loan Given</option>
+                        <option value="Loan Received">Loan Received</option>
+                        <option value="Received Back">Received Back</option>
+                        <option value="Paid Back">Paid Back</option>
+                        <option value="EMI">EMI</option>
                     </optgroup>
                 </select>
             </div>
@@ -559,15 +609,52 @@
     <script>
         const categories = {
             income: ['Salary', 'Freelance', 'Investment', 'Other'],
-            expense: ['Bills', 'Credit Card', 'Entertainment', 'EMI', 'Food', 'Home', 'Health', 'Rent', 'Transport', 'Trip', 'Miscellaneous', 'Other']
+            expense: ['Bills', 'Credit Card', 'Entertainment', 'EMI', 'Food', 'Home', 'Health', 'Rent', 'Transport', 'Trip', 'Miscellaneous', 'Other'],
+            loan: ['Loan Given', 'Loan Received', 'Received Back', 'Paid Back', 'EMI']
         };
 
         const typeSelect = document.getElementById('type');
         const categorySelect = document.getElementById('category');
 
-        typeSelect.addEventListener('change', updateCategories);
+        // Initialize person field visibility
+        function initializePersonField() {
+            const personField = document.getElementById('person').parentElement;
+            if (typeSelect.value === 'loan') {
+                personField.style.display = '';
+                document.getElementById('person').required = true;
+            } else {
+                personField.style.display = 'none';
+                document.getElementById('person').required = false;
+                document.getElementById('person').value = '';
+            }
+        }
 
-        function updateCategories() {
+        typeSelect.addEventListener('change', function() {
+            const selectedType = typeSelect.value;
+            categorySelect.innerHTML = '';
+            
+            if (selectedType === 'loan') {
+                categories.loan.forEach(category => {
+                    const option = document.createElement('option');
+                    option.value = category;
+                    option.textContent = category;
+                    categorySelect.appendChild(option);
+                });
+            } else {
+                categories[selectedType].forEach(category => {
+                    const option = document.createElement('option');
+                    option.value = category;
+                    option.textContent = category;
+                    categorySelect.appendChild(option);
+                });
+            }
+            
+            initializePersonField();
+        });
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set initial categories
             const selectedType = typeSelect.value;
             categorySelect.innerHTML = '';
             categories[selectedType].forEach(category => {
@@ -576,9 +663,22 @@
                 option.textContent = category;
                 categorySelect.appendChild(option);
             });
-        }
-
-        updateCategories();
+            
+            initializePersonField();
+            
+            // Set default date filter to "All Dates"
+            document.getElementById('dateFilter').value = 'all';
+            
+            // Set default month filter to current month
+            const currentMonth = new Date().getMonth() + 1; // getMonth() returns 0-11
+            document.getElementById('monthFilter').value = currentMonth.toString();
+            
+            // Initialize other filters
+            updateExpensePieChart(transactions);
+            updateYearlyBarChart(transactions);
+            applySummaryFilters();
+            applyTransactionsFilters();
+        });
 
         let transactions = [];
         const fileName = '2025_transactions.json';
@@ -628,7 +728,8 @@
                 div.style.borderRadius = '8px';
                 div.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
                 div.style.transition = 'transform 0.2s';
-                div.style.borderLeft = transaction.type === 'income' ? '4px solid #28a745' : '4px solid #dc3545';
+                div.style.borderLeft = transaction.type === 'income' ? '4px solid #28a745' : 
+                                     transaction.type === 'loan' ? '4px solid #2196F3' : '4px solid #dc3545';
 
                 // Date
                 const dateDiv = document.createElement('div');
@@ -645,6 +746,13 @@
                 categoryDiv.style.fontWeight = '500';
                 categoryDiv.textContent = transaction.category;
 
+                // Payment Mode
+                const paymentModeDiv = document.createElement('div');
+                paymentModeDiv.className = 'transaction-payment-mode';
+                paymentModeDiv.style.minWidth = '100px';
+                paymentModeDiv.style.color = '#495057';
+                paymentModeDiv.textContent = transaction.paymentMode.charAt(0).toUpperCase() + transaction.paymentMode.slice(1);
+
                 // Description
                 const descDiv = document.createElement('div');
                 descDiv.className = 'transaction-description';
@@ -652,23 +760,34 @@
                 descDiv.style.color = '#212529';
                 descDiv.textContent = transaction.description;
 
+                // Person (for loans)
+                const personDiv = document.createElement('div');
+                personDiv.className = 'transaction-person';
+                personDiv.style.minWidth = '120px';
+                personDiv.style.color = '#495057';
+                personDiv.textContent = transaction.person || '';
+
                 // Amount
                 const amountDiv = document.createElement('div');
                 amountDiv.className = 'transaction-amount';
                 amountDiv.style.minWidth = '100px';
                 amountDiv.style.textAlign = 'right';
                 amountDiv.style.fontWeight = 'bold';
-                amountDiv.style.color = transaction.type === 'income' ? '#28a745' : '#dc3545';
+                amountDiv.style.color = transaction.type === 'income' ? '#28a745' : 
+                                      transaction.type === 'loan' ? '#2196F3' : '#dc3545';
                 amountDiv.textContent = `₹${Number(transaction.amount).toFixed(2)}`;
 
                 // Actions
                 const actionsDiv = document.createElement('div');
                 actionsDiv.className = 'transaction-actions';
+                
                 // Delete button
                 const deleteBtn = document.createElement('button');
                 deleteBtn.className = 'delete-button';
                 deleteBtn.textContent = 'Delete';
                 deleteBtn.onclick = function() { deleteTransaction(transaction.id); };
+                actionsDiv.appendChild(deleteBtn);
+
                 // Edit button
                 const editBtn = document.createElement('button');
                 editBtn.className = 'submit-button';
@@ -677,12 +796,13 @@
                 editBtn.style.marginLeft = '5px';
                 editBtn.textContent = 'Edit';
                 editBtn.onclick = function() { editTransaction(transaction.id); };
-                actionsDiv.appendChild(deleteBtn);
                 actionsDiv.appendChild(editBtn);
 
                 div.appendChild(dateDiv);
                 div.appendChild(categoryDiv);
+                div.appendChild(paymentModeDiv);
                 div.appendChild(descDiv);
+                div.appendChild(personDiv);
                 div.appendChild(amountDiv);
                 div.appendChild(actionsDiv);
 
@@ -690,9 +810,34 @@
             });
         }
 
+        function updateCategories() {
+            const selectedType = document.getElementById('type').value;
+            const categorySelect = document.getElementById('category');
+            categorySelect.innerHTML = '';
+            
+            if (selectedType === 'loan') {
+                categories.loan.forEach(category => {
+                    const option = document.createElement('option');
+                    option.value = category;
+                    option.textContent = category;
+                    categorySelect.appendChild(option);
+                });
+            } else {
+                categories[selectedType].forEach(category => {
+                    const option = document.createElement('option');
+                    option.value = category;
+                    option.textContent = category;
+                    categorySelect.appendChild(option);
+                });
+            }
+            
+            initializePersonField();
+        }
+
         function editTransaction(id) {
             const transaction = transactions.find(t => t.id === id);
             if (!transaction) return;
+            
             editTransactionId = id;
             document.getElementById('type').value = transaction.type;
             updateCategories();
@@ -700,7 +845,9 @@
             document.getElementById('amount').value = parseFloat(transaction.amount).toFixed(2);
             document.getElementById('paymentMode').value = transaction.paymentMode;
             document.getElementById('date').value = transaction.date;
-            document.getElementById('description').value = transaction.description;
+            document.getElementById('description').value = transaction.description || '';
+            document.getElementById('person').value = transaction.person || '';
+            
             // Change button to 'Update Transaction'
             document.getElementById('addOrUpdateBtn').textContent = 'Update Transaction';
             // Switch to Add Transaction tab
@@ -715,6 +862,7 @@
             const paymentMode = document.getElementById('paymentMode').value;
             const date = document.getElementById('date').value;
             const description = document.getElementById('description').value;
+            const person = document.getElementById('person').value;
 
             if (!amountRaw || isNaN(amount) || amount <= 0) {
                 alert('Please enter a valid positive amount');
@@ -724,9 +872,12 @@
                 alert('Please enter a valid date');
                 return;
             }
+            if ((type === 'loan') && !person) {
+                alert('Please enter the person\'s name for loan transactions');
+                return;
+            }
 
             if (editTransactionId) {
-                // Update existing transaction
                 const idx = transactions.findIndex(t => t.id === editTransactionId);
                 if (idx !== -1) {
                     transactions[idx] = {
@@ -736,13 +887,13 @@
                         amount,
                         paymentMode,
                         date,
-                        description
+                        description,
+                        person
                     };
                 }
                 editTransactionId = null;
                 document.getElementById('addOrUpdateBtn').textContent = 'Add Transaction';
             } else {
-                // Add new transaction
                 const transaction = {
                     type,
                     category,
@@ -750,6 +901,7 @@
                     paymentMode,
                     date,
                     description,
+                    person,
                     id: Date.now()
                 };
                 transactions.push(transaction);
@@ -785,87 +937,156 @@
             let totalIncome = 0;
             let totalExpenses = 0;
             let creditCardDue = 0;
+            let loansGiven = 0;
+            let loansReceived = 0;
+            let loanAmount = 0;
 
             transactions.sort((a, b) => new Date(b.date) - new Date(a.date));
 
             transactions.forEach(transaction => {
                 if (transaction.type === 'income') {
                     totalIncome += transaction.amount;
-                } else {
-                    // Handle expenses based on payment mode and category
+                } else if (transaction.type === 'expense') {
                     if (transaction.category === 'Credit Card') {
-                        // Only update credit card due when settling credit card bill
                         creditCardDue -= transaction.amount;
                     } else {
-                        // Add all other expenses to total expenses
                         totalExpenses += transaction.amount;
-                        
-                        // If paid with credit card, add to credit card due
                         if (transaction.paymentMode === 'credit') {
                             creditCardDue += transaction.amount;
                         }
+                    }
+                } else if (transaction.type === 'loan') {
+                    switch(transaction.category) {
+                        case 'Loan Given':
+                            loansGiven += transaction.amount;
+                            totalExpenses += transaction.amount;
+                            break;
+                        case 'Loan Received':
+                            loansReceived += transaction.amount;
+                            loanAmount += transaction.amount;
+                            break;
+                        case 'Received Back':
+                            loansGiven -= transaction.amount;
+                            totalExpenses -= transaction.amount;
+                            break;
+                        case 'Paid Back':
+                            loansReceived -= transaction.amount;
+                            totalExpenses += transaction.amount;
+                            break;
+                        case 'EMI':
+                            loansReceived -= transaction.amount;
+                            totalExpenses += transaction.amount;
+                            break;
                     }
                 }
 
                 const div = document.createElement('div');
                 div.className = `transaction ${transaction.type}`;
-                div.innerHTML = `
-                    <div class="transaction-date">${new Date(transaction.date).toLocaleDateString()}</div>
-                    <div class="transaction-category">${transaction.category}</div>
-                    <div class="transaction-description">${transaction.description}</div>
-                    <div class="transaction-amount">₹${Number(transaction.amount).toFixed(2)}</div>
-                    <div class="transaction-actions">
-                        <button class="delete-button" onclick="deleteTransaction(${transaction.id})">Delete</button>
-                    </div>
-                `;
+                div.style.display = 'flex';
+                div.style.justifyContent = 'space-between';
+                div.style.alignItems = 'center';
+                div.style.padding = '15px';
+                div.style.margin = '10px 0';
+                div.style.backgroundColor = 'white';
+                div.style.borderRadius = '8px';
+                div.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+                div.style.transition = 'transform 0.2s';
+                div.style.borderLeft = transaction.type === 'income' ? '4px solid #28a745' : 
+                                     transaction.type === 'loan' ? '4px solid #2196F3' : '4px solid #dc3545';
+                
+                // Date
+                const dateDiv = document.createElement('div');
+                dateDiv.className = 'transaction-date';
+                dateDiv.style.minWidth = '100px';
+                dateDiv.style.color = '#6c757d';
+                dateDiv.textContent = new Date(transaction.date).toLocaleDateString();
+
+                // Category
+                const categoryDiv = document.createElement('div');
+                categoryDiv.className = 'transaction-category';
+                categoryDiv.style.minWidth = '120px';
+                categoryDiv.style.color = '#495057';
+                categoryDiv.style.fontWeight = '500';
+                categoryDiv.textContent = transaction.category;
+
+                // Payment Mode
+                const paymentModeDiv = document.createElement('div');
+                paymentModeDiv.className = 'transaction-payment-mode';
+                paymentModeDiv.style.minWidth = '100px';
+                paymentModeDiv.style.color = '#495057';
+                paymentModeDiv.textContent = transaction.paymentMode.charAt(0).toUpperCase() + transaction.paymentMode.slice(1);
+
+                // Person (for loans)
+                const personDiv = document.createElement('div');
+                personDiv.className = 'transaction-person';
+                personDiv.style.minWidth = '120px';
+                personDiv.style.color = '#495057';
+                personDiv.textContent = transaction.person || '';
+
+                // Description
+                const descDiv = document.createElement('div');
+                descDiv.className = 'transaction-description';
+                descDiv.style.flexGrow = '1';
+                descDiv.style.color = '#212529';
+                descDiv.textContent = transaction.description;
+
+                // Amount
+                const amountDiv = document.createElement('div');
+                amountDiv.className = 'transaction-amount';
+                amountDiv.style.minWidth = '100px';
+                amountDiv.style.textAlign = 'right';
+                amountDiv.style.fontWeight = 'bold';
+                amountDiv.style.color = transaction.type === 'income' ? '#28a745' : 
+                                      transaction.type === 'loan' ? '#2196F3' : '#dc3545';
+                amountDiv.textContent = `₹${Number(transaction.amount).toFixed(2)}`;
+
+                // Actions
+                const actionsDiv = document.createElement('div');
+                actionsDiv.className = 'transaction-actions';
+                
+                // Delete button
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'delete-button';
+                deleteBtn.textContent = 'Delete';
+                deleteBtn.onclick = function() { deleteTransaction(transaction.id); };
+                actionsDiv.appendChild(deleteBtn);
+
+                // Edit button
+                const editBtn = document.createElement('button');
+                editBtn.className = 'submit-button';
+                editBtn.style.background = '#2196F3';
+                editBtn.style.color = 'white';
+                editBtn.style.marginLeft = '5px';
+                editBtn.textContent = 'Edit';
+                editBtn.onclick = function() { editTransaction(transaction.id); };
+                actionsDiv.appendChild(editBtn);
+
+                div.appendChild(dateDiv);
+                div.appendChild(categoryDiv);
+                div.appendChild(paymentModeDiv);
+                div.appendChild(personDiv);
+                div.appendChild(descDiv);
+                div.appendChild(amountDiv);
+                div.appendChild(actionsDiv);
+
                 transactionsList.appendChild(div);
             });
 
             document.getElementById('totalIncome').textContent = `₹${Number(totalIncome).toFixed(2)}`;
             document.getElementById('totalExpenses').textContent = `₹${Number(totalExpenses).toFixed(2)}`;
             document.getElementById('creditCardDue').textContent = `₹${Math.max(0, creditCardDue).toFixed(2)}`;
-            document.getElementById('balance').textContent = `₹${(totalIncome - totalExpenses).toFixed(2)}`;
+            document.getElementById('balance').textContent = `₹${(totalIncome - totalExpenses + loanAmount).toFixed(2)}`;
+            document.getElementById('loansGiven').textContent = `₹${Number(loansGiven).toFixed(2)}`;
+            document.getElementById('loansReceived').textContent = `₹${Number(loansReceived).toFixed(2)}`;
         }
 
         function clearForm() {
             document.getElementById('amount').value = '';
             document.getElementById('description').value = '';
+            document.getElementById('person').value = '';
             editTransactionId = null;
             document.getElementById('addOrUpdateBtn').textContent = 'Add Transaction';
         }
-
-        document.addEventListener('DOMContentLoaded', function() {
-            // Set default year and month filters to current year and month
-            const now = new Date();
-            const currentYear = now.getFullYear().toString();
-            const currentMonth = (now.getMonth() + 1).toString();
-            // For summary tab
-            const summaryYear = document.querySelector('#summaryFilters #yearFilter');
-            const summaryMonth = document.querySelector('#summaryFilters #monthFilter');
-            if (summaryYear) summaryYear.value = currentYear;
-            if (summaryMonth) summaryMonth.value = currentMonth;
-            // For transactions tab
-            const transactionsYear = document.querySelector('#transactionsFilters #yearFilter');
-            const transactionsMonth = document.querySelector('#transactionsFilters #monthFilter');
-            if (transactionsYear) transactionsYear.value = currentYear;
-            if (transactionsMonth) transactionsMonth.value = currentMonth;
-
-            updateExpensePieChart(transactions);
-            updateYearlyBarChart(transactions);
-            applySummaryFilters();
-            applyTransactionsFilters();
-            // Always show all transactions in original UI if no filters are set
-            if (
-                document.querySelector('#transactionsFilters #dateFilter').value === 'all' &&
-                document.querySelector('#transactionsFilters #monthFilter').value === 'all' &&
-                document.querySelector('#transactionsFilters #yearFilter').value === 'all' &&
-                document.querySelector('#transactionsFilters #categoryFilter').value === 'all'
-            ) {
-                displayTransactions(transactions);
-            }
-        });
-
-        loadTransactions();
 
         function showTab(tab) {
             document.getElementById('tabAddContent').style.display = tab === 'add' ? '' : 'none';
@@ -886,10 +1107,10 @@
 
         function getSummaryFilters() {
             return {
-                dateFilter: document.querySelector('#summaryFilters #dateFilter').value,
-                monthFilter: document.querySelector('#summaryFilters #monthFilter').value,
-                yearFilter: document.querySelector('#summaryFilters #yearFilter').value,
-                categoryFilter: document.querySelector('#summaryFilters #categoryFilter').value
+                dateFilter: document.getElementById('dateFilter').value,
+                monthFilter: document.getElementById('monthFilter').value,
+                yearFilter: document.getElementById('yearFilter').value,
+                categoryFilter: document.getElementById('categoryFilter').value
             };
         }
         function getTransactionsFilters() {
@@ -905,62 +1126,91 @@
             const filteredTransactions = transactions.filter(transaction => {
                 const transactionDate = new Date(transaction.date);
                 const today = new Date();
+                
                 // Date filter
                 if (dateFilter !== 'all') {
                     if (dateFilter === 'today') {
                         if (transactionDate.toDateString() !== today.toDateString()) return false;
-                    } else if (dateFilter === 'week') {
-                        const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
-                        if (transactionDate < weekAgo) return false;
-                    } else if (dateFilter === 'month') {
-                        if (transactionDate.getMonth() !== today.getMonth() || 
-                            transactionDate.getFullYear() !== today.getFullYear()) return false;
+                    } else if (dateFilter === 'yesterday') {
+                        const yesterday = new Date(today);
+                        yesterday.setDate(yesterday.getDate() - 1);
+                        if (transactionDate.toDateString() !== yesterday.toDateString()) return false;
+                    } else if (dateFilter === 'this_week') {
+                        const weekStart = new Date(today);
+                        weekStart.setDate(today.getDate() - today.getDay());
+                        if (transactionDate < weekStart) return false;
+                    } else if (dateFilter === 'last_week') {
+                        const lastWeekStart = new Date(today);
+                        lastWeekStart.setDate(today.getDate() - today.getDay() - 7);
+                        const lastWeekEnd = new Date(today);
+                        lastWeekEnd.setDate(today.getDate() - today.getDay() - 1);
+                        if (transactionDate < lastWeekStart || transactionDate > lastWeekEnd) return false;
                     }
                 }
+                
                 // Month filter
                 if (monthFilter !== 'all' && transactionDate.getMonth() + 1 !== parseInt(monthFilter)) return false;
+                
                 // Year filter
                 if (yearFilter !== 'all' && transactionDate.getFullYear() !== parseInt(yearFilter)) return false;
+                
                 // Category/type filter
                 if (categoryFilter === 'all_income') {
                     if (transaction.type !== 'income') return false;
                 } else if (categoryFilter === 'all_expense') {
                     if (transaction.type !== 'expense') return false;
+                } else if (categoryFilter === 'all_loans') {
+                    if (transaction.type !== 'loan') return false;
                 } else if (categoryFilter !== 'all' && transaction.category !== categoryFilter) {
                     return false;
                 }
                 return true;
             });
+
             updateExpensePieChart(filteredTransactions);
             updateYearlyBarChart(filteredTransactions);
-            // Optionally update balances if you want them filtered as well
+            updateSummaryDisplay(filteredTransactions);
         }
         function applyTransactionsFilters() {
             const {dateFilter, monthFilter, yearFilter, categoryFilter} = getTransactionsFilters();
             const filteredTransactions = transactions.filter(transaction => {
                 const transactionDate = new Date(transaction.date);
                 const today = new Date();
+                
                 // Date filter
                 if (dateFilter !== 'all') {
                     if (dateFilter === 'today') {
                         if (transactionDate.toDateString() !== today.toDateString()) return false;
-                    } else if (dateFilter === 'week') {
-                        const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
-                        if (transactionDate < weekAgo) return false;
-                    } else if (dateFilter === 'month') {
-                        if (transactionDate.getMonth() !== today.getMonth() || 
-                            transactionDate.getFullYear() !== today.getFullYear()) return false;
+                    } else if (dateFilter === 'yesterday') {
+                        const yesterday = new Date(today);
+                        yesterday.setDate(yesterday.getDate() - 1);
+                        if (transactionDate.toDateString() !== yesterday.toDateString()) return false;
+                    } else if (dateFilter === 'this_week') {
+                        const weekStart = new Date(today);
+                        weekStart.setDate(today.getDate() - today.getDay());
+                        if (transactionDate < weekStart) return false;
+                    } else if (dateFilter === 'last_week') {
+                        const lastWeekStart = new Date(today);
+                        lastWeekStart.setDate(today.getDate() - today.getDay() - 7);
+                        const lastWeekEnd = new Date(today);
+                        lastWeekEnd.setDate(today.getDate() - today.getDay() - 1);
+                        if (transactionDate < lastWeekStart || transactionDate > lastWeekEnd) return false;
                     }
                 }
+                
                 // Month filter
                 if (monthFilter !== 'all' && transactionDate.getMonth() + 1 !== parseInt(monthFilter)) return false;
+                
                 // Year filter
                 if (yearFilter !== 'all' && transactionDate.getFullYear() !== parseInt(yearFilter)) return false;
+                
                 // Category/type filter
                 if (categoryFilter === 'all_income') {
                     if (transaction.type !== 'income') return false;
                 } else if (categoryFilter === 'all_expense') {
                     if (transaction.type !== 'expense') return false;
+                } else if (categoryFilter === 'all_loans') {
+                    if (transaction.type !== 'loan') return false;
                 } else if (categoryFilter !== 'all' && transaction.category !== categoryFilter) {
                     return false;
                 }
@@ -985,8 +1235,11 @@
         }
 
         function updateExpensePieChart(filteredTransactions) {
-            // Only consider expense transactions
-            const expenseTransactions = filteredTransactions.filter(t => t.type === 'expense' && t.category !== 'Credit Card');
+            // Consider both expense and loan transactions
+            const expenseTransactions = filteredTransactions.filter(t => 
+                (t.type === 'expense' && t.category !== 'Credit Card') || 
+                (t.type === 'loan' && ['Loan Given', 'Paid Back', 'EMI'].includes(t.category))
+            );
             const categorySums = {};
             let total = 0;
             expenseTransactions.forEach(t => {
@@ -1028,7 +1281,7 @@
                         }
                     }
                 });
-                document.getElementById('expenseSum').textContent = `Total Expenses: ₹${Number(total).toFixed(2)}`;
+                document.getElementById('expenseSum').textContent = `Total Expenses & Loans: ₹${Number(total).toFixed(2)}`;
             } else {
                 // Show empty chart with a label
                 expensePieChartInstance = new Chart(ctx, {
@@ -1060,16 +1313,30 @@
             // Prepare data
             let incomeByMonth = Array(12).fill(0);
             let expenseByMonth = Array(12).fill(0);
+            let loanByMonth = Array(12).fill(0);
+            
             filteredTransactions.forEach(t => {
                 const d = new Date(t.date);
                 if (d.getFullYear() === year) {
-                    if (t.type === 'income') incomeByMonth[d.getMonth()] += t.amount;
-                    if (t.type === 'expense' && t.category !== 'Credit Card') expenseByMonth[d.getMonth()] += t.amount;
+                    if (t.type === 'income') {
+                        incomeByMonth[d.getMonth()] += t.amount;
+                    } else if (t.type === 'expense' && t.category !== 'Credit Card') {
+                        expenseByMonth[d.getMonth()] += t.amount;
+                    } else if (t.type === 'loan') {
+                        if (['Loan Given', 'Paid Back', 'EMI'].includes(t.category)) {
+                            expenseByMonth[d.getMonth()] += t.amount;
+                        } else if (t.category === 'Loan Received') {
+                            loanByMonth[d.getMonth()] += t.amount;
+                        }
+                    }
                 }
             });
+            
             // Round values
             incomeByMonth = incomeByMonth.map(v => Number(v).toFixed(2));
             expenseByMonth = expenseByMonth.map(v => Number(v).toFixed(2));
+            loanByMonth = loanByMonth.map(v => Number(v).toFixed(2));
+            
             const ctx = document.getElementById('yearlyBarChart').getContext('2d');
             if (yearlyBarChartInstance) yearlyBarChartInstance.destroy();
             yearlyBarChartInstance = new Chart(ctx, {
@@ -1083,9 +1350,14 @@
                             backgroundColor: 'rgba(76, 175, 80, 0.7)'
                         },
                         {
-                            label: 'Expense',
+                            label: 'Expenses & Loans',
                             data: expenseByMonth,
                             backgroundColor: 'rgba(244, 67, 54, 0.7)'
+                        },
+                        {
+                            label: 'Loans Received',
+                            data: loanByMonth,
+                            backgroundColor: 'rgba(33, 150, 243, 0.7)'
                         }
                     ]
                 },
@@ -1104,9 +1376,117 @@
                     }
                 }
             });
-            document.getElementById('yearlyBarLabel').textContent = `Yearly Income & Expense (${year})`;
+            document.getElementById('yearlyBarLabel').textContent = `Yearly Income, Expenses & Loans (${year})`;
             document.getElementById('yearlyBarChart').style.display = 'block';
         }
+
+        function updateSummaryDisplay(filteredTransactions) {
+            let totalIncome = 0;
+            let totalExpenses = 0;
+            let creditCardDue = 0;
+            let loansGiven = 0;
+            let loansReceived = 0;
+            let loanAmount = 0;
+
+            // Calculate filtered totals
+            filteredTransactions.forEach(transaction => {
+                if (transaction.type === 'income') {
+                    totalIncome += transaction.amount;
+                } else if (transaction.type === 'expense') {
+                    if (transaction.category === 'Credit Card') {
+                        creditCardDue -= transaction.amount;
+                    } else {
+                        totalExpenses += transaction.amount;
+                        if (transaction.paymentMode === 'credit') {
+                            creditCardDue += transaction.amount;
+                        }
+                    }
+                } else if (transaction.type === 'loan') {
+                    switch(transaction.category) {
+                        case 'Loan Given':
+                            loansGiven += transaction.amount;
+                            totalExpenses += transaction.amount;
+                            break;
+                        case 'Loan Received':
+                            loansReceived += transaction.amount;
+                            loanAmount += transaction.amount;
+                            break;
+                        case 'Received Back':
+                            loansGiven -= transaction.amount;
+                            totalExpenses -= transaction.amount;
+                            break;
+                        case 'Paid Back':
+                            loansReceived -= transaction.amount;
+                            totalExpenses += transaction.amount;
+                            break;
+                        case 'EMI':
+                            loansReceived -= transaction.amount;
+                            totalExpenses += transaction.amount;
+                            break;
+                    }
+                }
+            });
+
+            // Calculate unfiltered totals for credit card, loans given, and loans received
+            let unfilteredCreditCardDue = 0;
+            let unfilteredLoansGiven = 0;
+            let unfilteredLoansReceived = 0;
+
+            transactions.forEach(transaction => {
+                if (transaction.type === 'expense') {
+                    if (transaction.category === 'Credit Card') {
+                        unfilteredCreditCardDue -= transaction.amount;
+                    } else if (transaction.paymentMode === 'credit') {
+                        unfilteredCreditCardDue += transaction.amount;
+                    }
+                } else if (transaction.type === 'loan') {
+                    switch(transaction.category) {
+                        case 'Loan Given':
+                            unfilteredLoansGiven += transaction.amount;
+                            break;
+                        case 'Received Back':
+                            unfilteredLoansGiven -= transaction.amount;
+                            break;
+                        case 'Loan Received':
+                            unfilteredLoansReceived += transaction.amount;
+                            break;
+                        case 'Paid Back':
+                        case 'EMI':
+                            unfilteredLoansReceived -= transaction.amount;
+                            break;
+                    }
+                }
+            });
+
+            document.getElementById('totalIncome').textContent = `₹${Number(totalIncome).toFixed(2)}`;
+            document.getElementById('totalExpenses').textContent = `₹${Number(totalExpenses).toFixed(2)}`;
+            document.getElementById('creditCardDue').textContent = `₹${Math.max(0, unfilteredCreditCardDue).toFixed(2)}`;
+            document.getElementById('balance').textContent = `₹${(totalIncome - totalExpenses + loanAmount).toFixed(2)}`;
+            document.getElementById('loansGiven').textContent = `₹${Number(unfilteredLoansGiven).toFixed(2)}`;
+            document.getElementById('loansReceived').textContent = `₹${Number(unfilteredLoansReceived).toFixed(2)}`;
+        }
+
+        // Initialize filters on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set default date filter to "All Dates" for both tabs
+            document.querySelectorAll('#dateFilter').forEach(filter => {
+                filter.value = 'all';
+            });
+            
+            // Set default month filter to current month for both tabs
+            const currentMonth = new Date().getMonth() + 1; // getMonth() returns 0-11
+            const summaryMonthFilter = document.querySelector('#summaryFilters #monthFilter');
+            const transactionsMonthFilter = document.querySelector('#transactionsFilters #monthFilter');
+            
+            if (summaryMonthFilter) summaryMonthFilter.value = currentMonth.toString();
+            if (transactionsMonthFilter) transactionsMonthFilter.value = currentMonth.toString();
+            
+            // Initialize other filters
+            updateExpensePieChart(transactions);
+            updateYearlyBarChart(transactions);
+            applySummaryFilters();
+            applyTransactionsFilters();
+        });
     </script>
 </body>
 </html>
