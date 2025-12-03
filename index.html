@@ -669,6 +669,11 @@
             document.getElementById('monthFilter').value = currentMonth;
             document.querySelector('#transactionsFilters #monthFilter').value = currentMonth;
 
+            // Set default year to current year in both tabs
+            const currentYear = new Date().getFullYear();
+            document.getElementById('yearFilter').value = currentYear;
+            document.querySelector('#transactionsFilters #yearFilter').value = currentYear;
+
             updateExpensePieChart(transactions);
             updateYearlyBarChart(transactions);
             applySummaryFilters();
