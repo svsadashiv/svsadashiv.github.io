@@ -956,10 +956,10 @@
                 if (transaction.type === 'income') {
                     totalIncome += transaction.amount;
                 } else if (transaction.type === 'expense') {
+                    totalExpenses += transaction.amount;
                     if (transaction.category === 'Credit Card') {
                         creditCardDue -= transaction.amount;
                     } else {
-                        totalExpenses += transaction.amount;
                         if (transaction.paymentMode === 'credit') {
                             creditCardDue += transaction.amount;
                         }
@@ -1234,7 +1234,7 @@
         function updateExpensePieChart(filteredTransactions) {
             // Consider both expense and loan transactions
             const expenseTransactions = filteredTransactions.filter(t => 
-                (t.type === 'expense' && t.category !== 'Credit Card') || 
+                (t.type === 'expense') || 
                 (t.type === 'loan' && ['Loan Given', 'Paid Back', 'EMI'].includes(t.category))
             );
             const categorySums = {};
@@ -1317,7 +1317,7 @@
                 if (d.getFullYear() === year) {
                     if (t.type === 'income') {
                         incomeByMonth[d.getMonth()] += t.amount;
-                    } else if (t.type === 'expense' && t.category !== 'Credit Card') {
+                    } else if (t.type === 'expense') {
                         expenseByMonth[d.getMonth()] += t.amount;
                     } else if (t.type === 'loan') {
                         if (['Loan Given', 'Paid Back', 'EMI'].includes(t.category)) {
@@ -1414,10 +1414,10 @@
                 if (transaction.type === 'income') {
                     totalIncome += transaction.amount;
                 } else if (transaction.type === 'expense') {
+                    totalExpenses += transaction.amount;
                     if (transaction.category === 'Credit Card') {
                         creditCardDue -= transaction.amount;
                     } else {
-                        totalExpenses += transaction.amount;
                         if (transaction.paymentMode === 'credit') {
                             creditCardDue += transaction.amount;
                         }
