@@ -437,9 +437,6 @@
                 <label for="yearFilter">Year:</label>
                 <select id="yearFilter" class="filter-select" onchange="applySummaryFilters()">
                     <option value="all">All Years</option>
-                    <option value="2023">2023</option>
-                    <option value="2024">2024</option>
-                    <option value="2025">2025</option>
                 </select>
             </div>
             <div class="filter-group">
@@ -556,9 +553,6 @@
                 <label for="yearFilter">Year:</label>
                 <select id="yearFilter" class="filter-select" onchange="applyTransactionsFilters()">
                     <option value="all">All Years</option>
-                    <option value="2023">2023</option>
-                    <option value="2024">2024</option>
-                    <option value="2025">2025</option>
                 </select>
             </div>
             <div class="filter-group">
@@ -659,6 +653,24 @@
             });
             
             initializePersonField();
+
+            // Populate year filters dynamically from 2024 to current year
+            const currentYear = new Date().getFullYear();
+            const startYear = 2024;
+            const summaryYearFilter = document.getElementById('yearFilter');
+            const transactionsYearFilter = document.querySelector('#transactionsFilters #yearFilter');
+
+            for (let year = currentYear; year >= startYear; year--) {
+                const summaryOption = document.createElement('option');
+                summaryOption.value = year;
+                summaryOption.textContent = year;
+                summaryYearFilter.appendChild(summaryOption);
+                
+                const transactionsOption = document.createElement('option');
+                transactionsOption.value = year;
+                transactionsOption.textContent = year;
+                transactionsYearFilter.appendChild(transactionsOption);
+            }
             
             // Set default date filter to "All Dates"
             document.getElementById('dateFilter').value = 'all';
@@ -670,7 +682,6 @@
             document.querySelector('#transactionsFilters #monthFilter').value = currentMonth;
 
             // Set default year to current year in both tabs
-            const currentYear = new Date().getFullYear();
             document.getElementById('yearFilter').value = currentYear;
             document.querySelector('#transactionsFilters #yearFilter').value = currentYear;
 
