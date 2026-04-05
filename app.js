@@ -836,6 +836,7 @@ function openAddTransaction(editId = null) {
       ? '<p style="color:var(--orange);font-size:13px">⚠ No cards added. Go to Cards tab first.</p>'
       : `<select class="form-select" id="txn-card">${DB.getCards().map((c,i)=>`<option value="${c.id}" ${edit?.creditCardId===c.id||(i===0&&!edit?.creditCardId)?'selected':''}>${c.bank} ···· ${c.last4} (Avail: ${DB.fmtINR(c.limit-c.balance)})</option>`).join('')}</select>`
     }
+  </div>
   <input type="hidden" id="txn-type" value="${type}" />
   <input type="hidden" id="txn-cat" value="${edit?.categoryId||''}" />
   <input type="hidden" id="txn-id" value="${edit?.id||''}" />
