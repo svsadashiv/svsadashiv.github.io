@@ -714,6 +714,215 @@ section {
 .code-mock .str { color: rgba(34,211,165,0.7); }
 .code-mock .fn { color: rgba(250,204,21,0.5); }
 
+/* EXPLORE / APP SHOWCASE */
+.explore-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+}
+
+.app-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  overflow: hidden;
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.25s;
+  position: relative;
+}
+
+.app-card:hover {
+  border-color: rgba(249,115,22,0.35);
+  transform: translateY(-4px);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+}
+
+.app-card.app-featured {
+  grid-column: 1 / -1;
+  flex-direction: row;
+  min-height: 200px;
+}
+
+/* Preview pane at top (or left for featured) */
+.app-preview {
+  background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 130px;
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.app-featured .app-preview {
+  flex: 0 0 260px;
+  min-height: auto;
+  border-bottom: none;
+  border-right: 1px solid var(--border);
+}
+
+/* Decorative browser chrome inside preview */
+.app-browser {
+  width: 100%;
+  background: var(--bg);
+  border-radius: 8px;
+  border: 1px solid var(--border-bright);
+  overflow: hidden;
+  font-family: 'Geist Mono', monospace;
+}
+
+.app-browser-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  background: rgba(255,255,255,0.03);
+  border-bottom: 1px solid var(--border);
+}
+
+.app-browser-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+}
+
+.app-browser-dot:nth-child(1) { background: rgba(249,115,22,0.6); }
+.app-browser-dot:nth-child(2) { background: rgba(250,204,21,0.4); }
+.app-browser-dot:nth-child(3) { background: rgba(34,211,165,0.4); }
+
+.app-browser-url {
+  flex: 1;
+  height: 14px;
+  background: rgba(255,255,255,0.04);
+  border-radius: 4px;
+  margin-left: 6px;
+  font-size: 8px;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  padding: 0 8px;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.app-browser-content {
+  padding: 10px;
+  min-height: 60px;
+  font-size: 8px;
+  color: rgba(255,255,255,0.15);
+  line-height: 1.8;
+}
+
+/* Xpense preview bars */
+.xpense-preview { display: flex; flex-direction: column; gap: 5px; }
+.xp-bar { height: 6px; border-radius: 3px; background: rgba(34,211,165,0.3); }
+.xp-bar:nth-child(1) { width: 75%; background: rgba(34,211,165,0.5); }
+.xp-bar:nth-child(2) { width: 55%; background: rgba(79,156,249,0.4); }
+.xp-bar:nth-child(3) { width: 88%; background: rgba(249,115,22,0.4); }
+.xp-bar:nth-child(4) { width: 40%; background: rgba(250,204,21,0.3); }
+.xp-label { display: flex; justify-content: space-between; margin-top: 2px; font-size: 7px; color: rgba(255,255,255,0.2); }
+
+/* Timezone preview clocks */
+.tz-preview { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+.tz-clock { background: rgba(79,156,249,0.06); border: 1px solid rgba(79,156,249,0.12); border-radius: 5px; padding: 5px 7px; }
+.tz-city { font-size: 7px; color: rgba(255,255,255,0.25); margin-bottom: 2px; }
+.tz-time { font-size: 10px; color: rgba(79,156,249,0.6); font-weight: 600; letter-spacing: 0.05em; }
+
+/* App body */
+.app-body {
+  padding: 1.4rem 1.75rem 1.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  flex: 1;
+}
+
+.app-featured .app-body {
+  justify-content: center;
+  padding: 2rem;
+}
+
+.app-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.app-meta { flex: 1; }
+
+.app-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: 'Geist Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent2);
+  background: rgba(34,211,165,0.08);
+  border: 1px solid rgba(34,211,165,0.2);
+  border-radius: 100px;
+  padding: 3px 9px;
+  margin-bottom: 8px;
+}
+
+.app-status::before {
+  content: '';
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--accent2);
+}
+
+.app-name {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.app-desc {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+.app-launch {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: rgba(249,115,22,0.12);
+  border: 1px solid rgba(249,115,22,0.3);
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--warm);
+  transition: all 0.2s;
+  margin-top: 0.25rem;
+  align-self: flex-start;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.app-card:hover .app-launch {
+  background: rgba(249,115,22,0.2);
+  border-color: rgba(249,115,22,0.5);
+}
+
+.section-tag.warm {
+  color: var(--warm);
+}
+.section-tag.warm::before {
+  background: var(--warm);
+}
+
 /* CONTACT */
 .contact-section {
   padding: 80px 0 100px;
@@ -813,9 +1022,11 @@ footer {
 @media (max-width: 768px) {
   .nav-links { display: none; }
   .hero { padding: 120px 0 60px; }
-  .about-grid, .about-main, .projects-grid { grid-template-columns: 1fr; }
+  .about-grid, .about-main, .projects-grid, .explore-grid { grid-template-columns: 1fr; }
   .project-card.featured { flex-direction: column; }
   .proj-visual { flex: none; height: 100px; width: 100%; }
+  .app-card.app-featured { flex-direction: column; }
+  .app-featured .app-preview { flex: none; min-height: 130px; border-right: none; border-bottom: 1px solid var(--border); }
   .contact-card { grid-template-columns: 1fr; }
   .stats-row { flex-wrap: wrap; }
   .stat-item { flex: 1 1 45%; }
@@ -860,7 +1071,7 @@ footer {
 
     <div class="stats-row">
       <div class="stat-item">
-        <div class="stat-num">4</div>
+        <div class="stat-num">5</div>
         <div class="stat-label">Repositories</div>
       </div>
       <div class="stat-item">
@@ -996,12 +1207,30 @@ footer {
         </div>
       </a>
 
+      <!-- NcryptO -->
+      <a href="https://github.com/svsadashiv/ncrypto" target="_blank" class="project-card">
+        <div class="proj-icon" style="background:rgba(168,85,247,0.08);border-color:rgba(168,85,247,0.2);">🔐</div>
+        <div class="proj-header">
+          <div class="proj-meta">
+            <div class="proj-number">03</div>
+            <div class="proj-name">NcryptO</div>
+          </div>
+          <div class="proj-arrow">↗</div>
+        </div>
+        <p class="proj-desc">Client-side file encryption and decryption using AES-256-GCM/CBC and PBKDF2 key derivation. Files never leave your machine — 100% browser-native Web Crypto API.</p>
+        <div class="proj-tags">
+          <span class="proj-tag tag-html">HTML</span>
+          <span class="proj-tag" style="background:rgba(168,85,247,0.1);color:#a855f7;border:1px solid rgba(168,85,247,0.2);">AES-256</span>
+          <span class="proj-tag" style="background:rgba(168,85,247,0.08);color:#c084fc;border:1px solid rgba(168,85,247,0.15);">Security</span>
+        </div>
+      </a>
+
       <!-- Expense Old -->
       <a href="https://github.com/svsadashiv/expense_old" target="_blank" class="project-card">
         <div class="proj-icon blue">📋</div>
         <div class="proj-header">
           <div class="proj-meta">
-            <div class="proj-number">03</div>
+            <div class="proj-number">04</div>
             <div class="proj-name">Expense (Legacy)</div>
           </div>
           <div class="proj-arrow">↗</div>
@@ -1022,51 +1251,138 @@ footer {
 <!-- APPLICATIONS -->
 <div class="container" id="explore">
   <section>
-    <div class="section-tag">Applications</div>
+    <div class="section-tag warm">
+      Applications
+    </div>
     <h2 class="section-title">Explore</h2>
-    <p class="section-sub">Explore the applications</p>
+    <p class="section-sub">Live apps you can open right now — click to launch.</p>
 
-    <div class="projects-grid">
+    <div class="explore-grid">
 
       <!-- Xpense — Featured -->
-      <a href="https://svsadashiv.github.io/xpense" target="_blank" class="project-card featured">
-        <div class="proj-icon green">💸</div>
-        <div style="flex:1;">
-          <div class="proj-header">
-            <div class="proj-meta">
-              <div class="proj-number">01 — Featured Project</div>
-              <div class="proj-name">Xpense</div>
+      <a href="https://svsadashiv.github.io/xpense" target="_blank" class="app-card app-featured">
+        <div class="app-preview">
+          <div class="app-browser">
+            <div class="app-browser-bar">
+              <div class="app-browser-dot"></div>
+              <div class="app-browser-dot"></div>
+              <div class="app-browser-dot"></div>
+              <div class="app-browser-url">svsadashiv.github.io/xpense</div>
             </div>
-            <div class="proj-arrow">↗</div>
+            <div class="app-browser-content">
+              <div class="xpense-preview">
+                <div class="xp-label"><span>Groceries</span><span>₹1,240</span></div>
+                <div class="xp-bar"></div>
+                <div class="xp-label"><span>Transport</span><span>₹680</span></div>
+                <div class="xp-bar"></div>
+                <div class="xp-label"><span>Dining</span><span>₹2,100</span></div>
+                <div class="xp-bar"></div>
+                <div class="xp-label"><span>Utilities</span><span>₹450</span></div>
+                <div class="xp-bar"></div>
+              </div>
+            </div>
           </div>
-          <p class="proj-desc">A web application to track your expenses with ease. Designed to help users monitor spending habits, categorise transactions, and visualise their financial health — all in the browser.</p>
+        </div>
+        <div class="app-body">
+          <div class="app-header">
+            <div class="app-meta">
+              <div class="app-status">Live</div>
+              <div class="app-name">Xpense</div>
+              <p class="app-desc">Track your expenses directly in the browser. Monitor spending habits, categorise transactions, and visualise your financial health — no login required.</p>
+            </div>
+          </div>
+          <div class="app-launch">Launch App ↗</div>
         </div>
       </a>
 
       <!-- Time Zone -->
-      <a href="https://svsadashiv.github.io/timezone" target="_blank" class="project-card">
-        <div class="proj-icon blue">🕛</div>
-        <div class="proj-header">
-          <div class="proj-meta">
-            <div class="proj-number">02</div>
-            <div class="proj-name">Time Zone</div>
+      <a href="https://svsadashiv.github.io/timezone" target="_blank" class="app-card">
+        <div class="app-preview">
+          <div class="app-browser">
+            <div class="app-browser-bar">
+              <div class="app-browser-dot"></div>
+              <div class="app-browser-dot"></div>
+              <div class="app-browser-dot"></div>
+              <div class="app-browser-url">svsadashiv.github.io/timezone</div>
+            </div>
+            <div class="app-browser-content">
+              <div class="tz-preview">
+                <div class="tz-clock"><div class="tz-city">Mumbai</div><div class="tz-time">IST 14:30</div></div>
+                <div class="tz-clock"><div class="tz-city">London</div><div class="tz-time">UTC 09:00</div></div>
+                <div class="tz-clock"><div class="tz-city">New York</div><div class="tz-time">EST 04:00</div></div>
+                <div class="tz-clock"><div class="tz-city">Tokyo</div><div class="tz-time">JST 18:00</div></div>
+              </div>
+            </div>
           </div>
-          <div class="proj-arrow">↗</div>
         </div>
-        <p class="proj-desc">A lightweight, single-file web application for viewing live clocks across multiple time zones and converting specific times between them.</p>
+        <div class="app-body">
+          <div class="app-status">Live</div>
+          <div class="app-name">Time Zone</div>
+          <p class="app-desc">Live clocks across multiple time zones with instant conversion between them.</p>
+          <div class="app-launch">Launch App ↗</div>
+        </div>
+      </a>
+
+      <!-- NcryptO -->
+      <a href="https://svsadashiv.github.io/ncrypto/" target="_blank" class="app-card">
+        <div class="app-preview">
+          <div class="app-browser">
+            <div class="app-browser-bar">
+              <div class="app-browser-dot"></div>
+              <div class="app-browser-dot"></div>
+              <div class="app-browser-dot"></div>
+              <div class="app-browser-url">svsadashiv.github.io/ncrypto</div>
+            </div>
+            <div class="app-browser-content">
+              <div style="display:flex;flex-direction:column;gap:5px;">
+                <div style="display:flex;align-items:center;gap:6px;">
+                  <div style="width:22px;height:22px;border-radius:5px;background:rgba(168,85,247,0.15);border:1px solid rgba(168,85,247,0.25);display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;">🔐</div>
+                  <div style="flex:1;height:5px;border-radius:3px;background:rgba(168,85,247,0.3);"></div>
+                </div>
+                <div style="height:4px;border-radius:2px;background:rgba(255,255,255,0.06);width:80%;"></div>
+                <div style="height:4px;border-radius:2px;background:rgba(255,255,255,0.04);width:60%;"></div>
+                <div style="margin-top:3px;display:flex;gap:4px;">
+                  <div style="flex:1;height:16px;border-radius:3px;background:rgba(168,85,247,0.15);border:1px solid rgba(168,85,247,0.2);"></div>
+                  <div style="flex:1;height:16px;border-radius:3px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="app-body">
+          <div class="app-status" style="color:#a855f7;background:rgba(168,85,247,0.08);border-color:rgba(168,85,247,0.2);">Live</div>
+          <div class="app-name">NcryptO</div>
+          <p class="app-desc">Encrypt and decrypt any file entirely in your browser — AES-256, no uploads, no servers, no trace.</p>
+          <div class="app-launch">Launch App ↗</div>
+        </div>
       </a>
 
       <!-- Expense Old -->
-      <a href="https://svsadashiv.github.io/expense_old" target="_blank" class="project-card">
-        <div class="proj-icon blue">📋</div>
-        <div class="proj-header">
-          <div class="proj-meta">
-            <div class="proj-number">03</div>
-            <div class="proj-name">Expense (Legacy)</div>
+      <a href="https://svsadashiv.github.io/expense_old" target="_blank" class="app-card">
+        <div class="app-preview">
+          <div class="app-browser">
+            <div class="app-browser-bar">
+              <div class="app-browser-dot"></div>
+              <div class="app-browser-dot"></div>
+              <div class="app-browser-dot"></div>
+              <div class="app-browser-url">svsadashiv.github.io/expense_old</div>
+            </div>
+            <div class="app-browser-content">
+              <div class="xpense-preview">
+                <div class="xp-label"><span>Total Spent</span><span>₹4,470</span></div>
+                <div class="xp-bar" style="width:60%;background:rgba(249,115,22,0.4);"></div>
+                <div class="xp-label"><span>Items</span><span>7 entries</span></div>
+                <div class="xp-bar" style="width:35%;background:rgba(250,204,21,0.3);"></div>
+              </div>
+            </div>
           </div>
-          <div class="proj-arrow">↗</div>
         </div>
-        <p class="proj-desc">The original iteration of the expense tracker. A pure HTML implementation — where the Xpense journey began and the core idea was first proven out.</p>
+        <div class="app-body">
+          <div class="app-status" style="color:var(--muted);background:rgba(107,118,133,0.08);border-color:rgba(107,118,133,0.2);">Legacy</div>
+          <div class="app-name">Expense <span style="font-size:13px;font-weight:500;color:var(--muted);">v1</span></div>
+          <p class="app-desc">The original expense tracker — pure HTML, zero dependencies. Where the idea was first proven out.</p>
+          <div class="app-launch">Launch App ↗</div>
+        </div>
       </a>
 
     </div>
